@@ -1,4 +1,4 @@
-# cdp-perf-test-suite-template
+# digital-waste-tracking-perf-test
 
 A JMeter based test runner for the CDP Platform.
 
