@@ -13,3 +13,7 @@ coverage
 jmeter.log
 report.csv
 reports/
+
+# Environment variables (if any get added)
+env.sh
+.env
