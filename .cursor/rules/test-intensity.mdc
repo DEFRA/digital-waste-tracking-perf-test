@@ -1,0 +1,38 @@
+---
+description: Test Intensity Guidelines
+globs:
+alwaysApply: true
+---
+
+# Test Intensity Guidelines
+
+## Load Tests (Normal Expected Load)
+- **User Count**: 10-50 users
+- **Duration**: Medium to Long (15-30 minutes)
+- **Purpose**: Test performance under normal expected load
+- **When to use**: Regular performance testing, CI/CD pipelines, capacity planning
+- **Ramp-up**: Gradual increase over 2-5 minutes
+- **Think Time**: 1-3 seconds between requests
+
+## Stress Tests (Beyond Normal Capacity)
+- **User Count**: 25-50+ users
+- **Duration**: Long (30+ minutes)
+- **Purpose**: Find breaking points, test resilience
+- **When to use**: Capacity planning, finding service limits
+- **Ramp-up**: Gradual increase over 5-10 minutes
+- **Think Time**: 0.5-2 seconds between requests
+
+## Spike Tests (Sudden Load Bursts)
+- **User Count**: Variable (5→50→5 users)
+- **Duration**: Medium (10-20 minutes)
+- **Purpose**: Test handling of sudden load spikes
+- **When to use**: Traffic burst testing, recovery testing
+- **Ramp-up**: Quick spike up, sustain, quick spike down
+- **Think Time**: 0.5-1 second between requests
+
+## Test Selection Guidelines
+- Start with load tests to establish baseline
+- Use stress tests to find breaking points
+- Use spike tests to verify recovery capabilities
+- Adjust user counts based on service capacity
+- Monitor resource utilization during tests

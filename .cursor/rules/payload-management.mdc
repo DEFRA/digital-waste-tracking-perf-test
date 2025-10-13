@@ -1,0 +1,39 @@
+---
+description: Payload Management Rules
+globs:
+alwaysApply: true
+---
+
+# Payload Management Rules
+
+## Payload File Structure
+- Use only two payload files: `create.json` and `update.json`
+- Store in `payloads/` directory at repository root
+- Use `testType` parameter for test-specific customization
+
+## Payload Content Rules
+- Include all required API fields
+- Use JMeter variables for dynamic data: `${__threadNum}`, `${__Random()}`, etc.
+- Use `${testType}` parameter for test-specific descriptions
+- Include realistic but performance-focused test data
+- Avoid hardcoded values that don't support load testing
+
+## Variable Usage
+- `${organisationApiId}` - Organization API ID
+- `${testType}` - Test type (Baseline, Load, Stress, Spike, Basic)
+- `${__time(yyyy-MM-dd'T'HH:mm:ss.SSS'Z')}` - Current timestamp
+- `${__threadNum}` - Thread number for unique identification
+- `${__Random(min,max)}` - Random number generation
+- `${globalMovementId}` - Global movement ID (for updates)
+
+## JMX Integration
+- Use `${__FileToString(${__P(user.dir)}/payloads/create.json,,)}` for create operations
+- Use `${__FileToString(${__P(user.dir)}/payloads/update.json,,)}` for update operations
+- Set `testType` parameter in User Defined Variables section
+- Ensure payload files are accessible from JMeter execution context
+
+## Maintenance
+- Update payload files when API changes
+- Test payload changes with all test types
+- Keep payloads simple and focused on performance testing
+- Avoid complex business logic in payloads

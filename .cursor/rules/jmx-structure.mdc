@@ -1,0 +1,78 @@
+---
+description: JMX File Structure Rules
+globs:
+alwaysApply: true
+---
+
+# JMX File Structure Rules
+
+## File Organization
+- Organize JMX files by operation first, then test type
+- Structure: `scenarios/[operation]/successfully/[test-type]-test.jmx`
+- Examples: `create-waste-movement/successfully/load-test.jmx`, `update-waste-movement/successfully/stress-test.jmx`
+
+## JMX File Content Rules
+
+### ✅ INCLUDE in .jmx files:
+1. **Core Business Logic**
+   - HTTP Samplers (API requests)
+   - Request/Response flow and sequencing
+   - JSON PostProcessors for data extraction
+   - Response Assertions for validation
+
+2. **Authentication Flow**
+   - OAuth2 token requests
+   - Authorization headers and token usage
+   - JSR223 PreProcessors/PostProcessors for custom logic
+
+3. **Data Processing**
+   - JSON path expressions for extracting response data
+   - Variable references for passing data between requests
+   - Custom Groovy script references (external files only)
+
+4. **Test Structure**
+   - Thread Groups and execution order
+   - Loop controllers and iteration logic
+   - Basic test plan configuration
+
+### ❌ EXCLUDE from .jmx files:
+1. **Configuration Data**
+   - User Defined Variables (use properties instead)
+   - Hardcoded URLs, credentials, or environment-specific values
+   - File paths and output locations
+
+2. **Result Collection Settings**
+   - ResultCollector configurations
+   - Save service properties (response_data, samplerData, etc.)
+   - Output file specifications
+
+3. **Environment-Specific Values**
+   - Base URLs, domains, ports
+   - Client IDs, secrets, API keys
+   - Test data and payloads (use external files)
+
+4. **Reporting Configuration**
+   - HTML report settings
+   - CSV/XML output formats
+   - Logging levels and verbosity
+
+## Implementation Guidelines
+- **Properties**: Use `${__P(propertyName)}` for all configurable values
+- **External Scripts**: Reference Groovy files with `filename` property
+- **External Data**: Use `${__FileToString()}` for payloads and test data
+- **Command Line**: Handle all configuration via script parameters
+- **Separation**: Keep business logic in .jmx, configuration in scripts
+
+## Payload Management
+- Use shared payload files: `payloads/create.json` and `payloads/update.json`
+- Use absolute paths in `${__FileToString()}` functions
+- Avoid embedding JSON directly in JMX files
+- Use JMeter variables for dynamic data generation
+
+## Naming Conventions
+- Test plans: `[Operation] - [Test Type] Test`
+- Thread groups: `[Test Type] - [X] Users`
+- Samplers: `[Operation] Waste Movement` or `[Operation] Waste Movement`
+
+## Goal
+Create portable, maintainable test plans that focus purely on the test flow and business logic, with all configuration externalized to command-line scripts and property files.

@@ -1,0 +1,54 @@
+---
+description: LLM Interaction Rules
+globs:
+alwaysApply: true
+---
+
+# LLM Interaction Rules
+
+## Repository Understanding
+- This is a JMeter-based performance testing repository for CDP Platform
+- Focus is on load, stress, and spike testing only
+- Functional testing is handled by a separate regression pack
+- Tests use external JSON payload files for reusability
+
+## Key Files to Understand
+- `scenarios/` - Contains organized JMX test files by operation and test type
+- `payloads/` - Contains shared JSON payload files
+- `TEST_ORGANIZATION.md` - Test structure and usage guide
+- `PAYLOAD_STRUCTURE.md` - Payload file documentation
+- `entrypoint.sh` - Docker container entry point
+- `Dockerfile` - Container configuration
+
+## Test Organization
+- `scenarios/create-waste-movement/successfully/` - Create operation tests
+- `scenarios/update-waste-movement/successfully/` - Update operation tests
+- Each operation has: `load-test.jmx`, `spike-test.jmx`, `stress-test.jmx`
+
+## When Making Changes
+1. Always consider the performance testing focus
+2. Maintain the organized folder structure
+3. Use shared payload files instead of embedded JSON
+4. Follow naming conventions and documentation standards
+5. Test changes locally before suggesting them
+
+## Common Tasks
+- Adding new performance tests
+- Modifying existing test configurations
+- Updating payload files for API changes
+- Organizing tests by intensity level
+- Updating documentation
+
+## What NOT to Do
+- Don't add functional testing (handled by regression pack)
+- Don't embed JSON directly in JMX files
+- Don't create redundant tests
+- Don't break the organized folder structure
+- Don't ignore documentation updates
+
+## Best Practices
+- Always read existing documentation first
+- Understand the test organization before making changes
+- Use consistent naming and structure
+- Focus on performance testing objectives
+- Maintain compatibility with CDP Platform

@@ -1,0 +1,33 @@
+---
+description: Performance Testing Rules
+globs:
+alwaysApply: true
+---
+
+# Performance Testing Rules
+
+## Purpose
+This repository is dedicated to **performance testing only**. It does NOT handle functional testing, business logic validation, or API contract testing.
+
+## Test Focus Areas
+- **Load Testing**: Normal expected load (10-50 users)
+- **Stress Testing**: Beyond normal capacity (25-50+ users)
+- **Spike Testing**: Sudden load bursts (5→50→5 users)
+
+## What NOT to Test
+- Business logic correctness (handled by regression pack)
+- API contract validation (handled by regression pack)
+- Edge case handling (handled by regression pack)
+- Basic connectivity (handled by regression pack)
+
+## Test Organization
+- `scenarios/load/` - Normal expected load tests
+- `scenarios/stress/` - Beyond normal capacity tests
+- `scenarios/spike/` - Sudden load burst tests
+
+## Key Principles
+1. Focus on performance metrics: response times, throughput, resource utilization
+2. Test under various load conditions, not business scenarios
+3. Use realistic but performance-focused test data
+4. Measure and report performance characteristics
+5. Avoid duplicating functional test coverage

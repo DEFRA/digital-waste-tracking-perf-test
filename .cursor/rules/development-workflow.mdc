@@ -1,0 +1,58 @@
+---
+description: Development Workflow Rules
+globs:
+alwaysApply: true
+---
+
+# Development Workflow Rules
+
+## Adding New Tests
+1. Determine appropriate test category (load/stress/spike)
+2. Create JMX file in correct folder
+3. Use existing payload files with appropriate testType
+4. Configure realistic user counts and durations
+5. Test locally before committing
+6. Update documentation
+
+## Modifying Existing Tests
+1. Understand the test's purpose and intensity level
+2. Make minimal changes to maintain test integrity
+3. Test changes locally
+4. Update documentation if test behavior changes
+5. Consider impact on other tests
+
+## Payload Changes
+1. Update payload files when API changes
+2. Test with all test types to ensure compatibility
+3. Maintain backward compatibility when possible
+4. Update documentation for payload changes
+5. Verify JMeter variable usage
+
+## Test Organization
+1. Keep tests organized by purpose and intensity
+2. Use consistent naming conventions
+3. Avoid creating redundant tests
+4. Focus on performance testing only
+5. Remove tests that duplicate regression pack coverage
+
+## Quality Assurance
+1. Test all changes locally before committing
+2. Verify test configuration and parameters
+3. Check payload file accessibility
+4. Validate test results and assertions
+5. Ensure tests run successfully in CDP environment
+
+## Environment Configuration
+1. Use `env.sh` for local development environment variables
+2. Use entrypoint scripts (`local-entrypoint.sh`, `entrypoint.sh`) to pass environment variables as JMeter properties
+3. Never commit sensitive credentials to the repository
+4. Use `env.sh.template` as a template for required environment variables
+5. Load environment variables before running JMeter tests
+6. Use `${__P(propertyName)}` in JMeter test plans to access properties
+
+## Documentation Updates
+1. Update relevant documentation when making changes
+2. Keep documentation current and accurate
+3. Include examples and usage instructions
+4. Document any breaking changes
+5. Maintain consistency across all documentation
