@@ -1,12 +1,19 @@
 #!/bin/sh
 
+if [ -f "./env.sh" ]; then
+  echo "env.sh file found"
+  source ./env.sh
+else
+  echo "env.sh file not found"
+fi
+
 echo "run_id: $RUN_ID in $ENVIRONMENT"
 
 NOW=$(date +"%Y%m%d-%H%M%S")
 
-if [ -z "${JM_HOME}" ]; then
-  JM_HOME=/opt/perftest
-fi
+# if [ -z "${JM_HOME}" ]; then
+#   JM_HOME=/opt/perftest
+# fi
 
 JM_SCENARIOS=${JM_HOME}/scenarios
 JM_REPORTS=${JM_HOME}/reports
@@ -18,8 +25,14 @@ SCENARIOFILE=${JM_SCENARIOS}/${TEST_SCENARIO}.jmx
 REPORTFILE=${NOW}-perftest-${TEST_SCENARIO}-report.csv
 LOGFILE=${JM_LOGS}/perftest-${TEST_SCENARIO}.log
 
-# Run the test suite
-jmeter -n -t ${SCENARIOFILE} -e -l "${REPORTFILE}" -o ${JM_REPORTS} -j ${LOGFILE} -f -Jenv="${ENVIRONMENT}"
+# Run the test suite with environment variables as JMeter properties
+jmeter -n -t ${SCENARIOFILE} -e -l "${REPORTFILE}" -o ${JM_REPORTS} -j ${LOGFILE} \
+  -Jenv=${ENVIRONMENT} \
+  -JorganisationApiId=${ORGANISATION_API_ID} \
+  -JclientId=${COGNITO_CLIENT_ID} \
+  -JclientSecret=${COGNITO_CLIENT_SECRET} \
+  -JauthBaseUrl=${COGNITO_OAUTH_BASE_URL} \
+  -JbaseUrl=${BASE_URL}
 test_exit_code=$?
 
 # Publish the results into S3 so they can be displayed in the CDP Portal
