@@ -14,6 +14,10 @@ if [ -f "results.jtl" ]; then
   rm -rf results.jtl
 fi
 
+if [ -f "jmeter.log" ]; then
+  rm -rf jmeter.log
+fi
+
 jmeter -n -t scenarios/create-waste-movement/successfully/baseline-test.jmx -l results.jtl -e -o reports/ \
   -Jenvironment=${ENVIRONMENT} \
   -JorganisationApiId=${ORGANISATION_API_ID} \

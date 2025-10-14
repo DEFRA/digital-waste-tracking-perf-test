@@ -93,19 +93,20 @@
           <stringProp name="HTTPSampler.path">/movements/receive</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="HTTP Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">${payload}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">false</boolProp>
+                <stringProp name="Argument.name"></stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Set request body directly" enabled="true">
-            <stringProp name="scriptLanguage">groovy</stringProp>
-            <stringProp name="script">// Get the payload from the previous script
-String payload = vars.get("payload")
-log.info("Setting request body directly: " + payload)
-
-// Set the request body directly on the sampler
-sampler.addNonEncodedArgument("", payload, "")
-sampler.setPostBodyRaw(true)</stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
           <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
@@ -129,13 +130,6 @@ sampler.setPostBodyRaw(true)</stringProp>
           <boolProp name="Assertion.assume_success">false</boolProp>
           <intProp name="Assertion.test_type">2</intProp>
         </ResponseAssertion>
-        <hashTree/>
-        <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="Log Response Body" enabled="true">
-          <stringProp name="scriptLanguage">groovy</stringProp>
-          <stringProp name="script">log.info("Response Code: " + prev.getResponseCode())
-log.info("Response Body: " + prev.getResponseDataAsString())
-log.info("Request Body: " + prev.getSamplerData())</stringProp>
-        </JSR223PostProcessor>
         <hashTree/>
         <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="Extract Global Movement ID" enabled="true">
           <stringProp name="JSONPostProcessor.referenceNames">globalMovementId</stringProp>

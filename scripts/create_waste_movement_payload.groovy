@@ -54,7 +54,3 @@ String payload = """{
 
 // Set the payload variable
 vars.put("payload", payload)
-
-// Debug logging
-log.info("Generated payload: " + payload)
-log.info("Payload variable set: " + vars.get("payload"))
