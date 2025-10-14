@@ -6,10 +6,11 @@ alwaysApply: true
 
 # Payload Management Rules
 
-## Payload File Structure
-- Use only two payload files: `create.json` and `update.json`
-- Store in `payloads/` directory at repository root
+## Payload Generation Structure
+- Use JSR223PreProcessor with external Groovy scripts for dynamic payload generation
+- Store Groovy scripts in `scripts/` directory at repository root
 - Use `testType` parameter for test-specific customization
+- Generate JSON payloads programmatically with variable substitution
 
 ## Payload Content Rules
 - Include all required API fields
@@ -27,13 +28,16 @@ alwaysApply: true
 - `${globalMovementId}` - Global movement ID (for updates)
 
 ## JMX Integration
-- Use `${__FileToString(${__P(user.dir)}/payloads/create.json,,)}` for create operations
-- Use `${__FileToString(${__P(user.dir)}/payloads/update.json,,)}` for update operations
+- Use JSR223PreProcessor with external Groovy scripts for dynamic payload generation
+- Use HTTP Arguments (not postBodyRaw) for complex JSON payloads with variable substitution
 - Set `testType` parameter in User Defined Variables section
-- Ensure payload files are accessible from JMeter execution context
+- Use `${payload}` variable in HTTP Arguments for clean variable substitution
+- Ensure Groovy scripts are accessible from JMeter execution context
 
 ## Maintenance
-- Update payload files when API changes
+- Update Groovy scripts when API changes
 - Test payload changes with all test types
-- Keep payloads simple and focused on performance testing
-- Avoid complex business logic in payloads
+- Keep payload generation simple and focused on performance testing
+- Avoid complex business logic in payload generation
+- Use `vars.put("payload", payload)` to set the payload variable
+- Ensure proper error handling in Groovy scripts

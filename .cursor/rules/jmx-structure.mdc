@@ -63,9 +63,18 @@ alwaysApply: true
 - **Command Line**: Handle all configuration via script parameters
 - **Separation**: Keep business logic in .jmx, configuration in scripts
 
+## HTTP Request Configuration for Complex JSON
+- **Use HTTP Arguments**: Set `postBodyRaw=false` and use HTTP Arguments for complex JSON
+- **Variable Substitution**: Use `${payload}` in HTTP Arguments for reliable variable substitution
+- **Avoid postBodyRaw**: Don't use `postBodyRaw=true` with complex JSON variable substitution
+- **Empty Argument Name**: Use empty argument name to make value become entire request body
+- **No Encoding**: Set `always_encode=false` and `use_equals=false` for JSON content
+
 ## Payload Management
-- Use shared payload files: `payloads/create.json` and `payloads/update.json`
-- Use absolute paths in `${__FileToString()}` functions
+- Use JSR223PreProcessor with external Groovy scripts for dynamic payload generation
+- Use HTTP Arguments (not postBodyRaw) for complex JSON payloads with variable substitution
+- Set `testType` parameter in User Defined Variables section
+- Use `${payload}` variable in HTTP Arguments for clean variable substitution
 - Avoid embedding JSON directly in JMX files
 - Use JMeter variables for dynamic data generation
 
