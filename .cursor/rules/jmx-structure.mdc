@@ -35,6 +35,73 @@ alwaysApply: true
    - Loop controllers and iteration logic
    - Basic test plan configuration
 
+## Thread Group Configuration Patterns
+
+### Duration-Based Execution (Recommended for Load/Stress/Spike Tests)
+- **Enable Scheduler**: `ThreadGroup.scheduler=true`
+- **Set Duration**: `ThreadGroup.duration=[seconds]` (e.g., 1800 for 30 minutes)
+- **Infinite Loops**: `LoopController.loops=-1` and `LoopController.continue_forever=false`
+- **Ramp-up**: `ThreadGroup.ramp_time=[seconds]` for gradual user increase
+- **Example**: 20 users, 300s ramp-up, 1800s duration = 5min ramp + 25min sustained load
+
+### Fixed-Loop Execution (Recommended for Baseline Tests)
+- **Disable Scheduler**: `ThreadGroup.scheduler=false` (or omit)
+- **Set Loop Count**: `LoopController.loops=[number]` (e.g., 1 for baseline)
+- **Disable Forever**: `LoopController.continue_forever=false`
+- **Example**: 1 user, 1 loop = single request for functional validation
+
+### Spike Test Pattern (Multi-Phase Execution)
+- **Phase 1 - Low Load**: 5 users, 30s ramp-up, 120s duration
+- **Phase 2 - High Load**: 30 users, 10s ramp-up, 120s duration  
+- **Phase 3 - Recovery**: 5 users, 10s ramp-up, 120s duration
+- **Total Duration**: ~6 minutes (2 minutes per phase)
+- **Purpose**: Test system behavior under sudden load spikes and recovery
+
+### Thread Group Properties
+- **User Count**: `ThreadGroup.num_threads` - number of concurrent users
+- **Ramp-up**: `ThreadGroup.ramp_time` - time to gradually start all users
+- **Delay**: `ThreadGroup.delay` - initial delay before starting (usually 0)
+- **Error Handling**: `ThreadGroup.on_sample_error=continue` - continue on errors
+- **User Persistence**: `ThreadGroup.same_user_on_next_iteration=true` - reuse users
+- **Scheduler**: `ThreadGroup.scheduler=true` - enable duration-based execution
+- **Duration**: `ThreadGroup.duration=[seconds]` - test duration in seconds
+
+## "Before All" Hook Pattern
+
+### Data Setup Outside Thread Groups
+- **Authentication**: JSR223PreProcessor at Test Plan level for shared token
+- **Payload Generation**: JSR223PreProcessor at Test Plan level for dynamic data
+- **Global Variables**: Set in User Defined Variables section
+- **Shared Resources**: Configure once, use across all threads
+
+### Implementation Pattern
+```xml
+<TestPlan>
+  <hashTree>
+    <!-- BEFORE ALL: Payload Generation -->
+    <JSR223PreProcessor testname="Generate Create Waste Movement Payload">
+      <stringProp name="filename">scripts/create_waste_movement_payload.groovy</stringProp>
+    </JSR223PreProcessor>
+    
+    <!-- BEFORE ALL: Authentication -->
+    <JSR223PreProcessor testname="Get Access Token">
+      <stringProp name="filename">scripts/get_accessToken.groovy</stringProp>
+    </JSR223PreProcessor>
+    
+    <!-- THREAD GROUP: Actual Test Execution -->
+    <ThreadGroup>
+      <!-- Test logic here -->
+    </ThreadGroup>
+  </hashTree>
+</TestPlan>
+```
+
+### Benefits of "Before All" Pattern
+- **Single Authentication**: Authenticate once, reuse across all threads
+- **Consistent Data**: Generate payloads once, use across all users
+- **Performance**: Avoid repeated setup overhead
+- **Maintainability**: Centralized data preparation logic
+
 ### ❌ EXCLUDE from .jmx files:
 1. **Configuration Data**
    - User Defined Variables (use properties instead)
@@ -65,23 +132,78 @@ alwaysApply: true
 
 ## HTTP Request Configuration for Complex JSON
 - **Use HTTP Arguments**: Set `postBodyRaw=false` and use HTTP Arguments for complex JSON
-- **Variable Substitution**: Use `${payload}` in HTTP Arguments for reliable variable substitution
+- **Variable Substitution**: Use `${postPayload}` for POST/create operations and `${putPayload}` for PUT/update operations
 - **Avoid postBodyRaw**: Don't use `postBodyRaw=true` with complex JSON variable substitution
 - **Empty Argument Name**: Use empty argument name to make value become entire request body
 - **No Encoding**: Set `always_encode=false` and `use_equals=false` for JSON content
+- **Headers**: Use HeaderManager for Content-Type and Authorization headers
+- **Authorization**: Use `${__P(global_access_token)}` for shared authentication token
 
 ## Payload Management
 - Use JSR223PreProcessor with external Groovy scripts for dynamic payload generation
 - Use HTTP Arguments (not postBodyRaw) for complex JSON payloads with variable substitution
 - Set `testType` parameter in User Defined Variables section
-- Use `${payload}` variable in HTTP Arguments for clean variable substitution
+- Use `${postPayload}` for POST/create operations and `${putPayload}` for PUT/update operations
 - Avoid embedding JSON directly in JMX files
 - Use JMeter variables for dynamic data generation
+- Generate payloads using dedicated Groovy scripts: `create_waste_movement_payload.groovy` and `update_waste_movement_payload.groovy`
+
+## Think Time Configuration
+- Use UniformRandomTimer for realistic user behavior simulation
+- **Delay**: 500ms base delay
+- **Range**: 1000ms random range (500-1500ms total)
+- **Purpose**: Simulate user thinking time between requests
+- **Placement**: At Test Plan level to apply to all ThreadGroups
 
 ## Naming Conventions
-- Test plans: `[Operation] - [Test Type] Test`
-- Thread groups: `[Test Type] - [X] Users`
-- Samplers: `[Operation] Waste Movement` or `[Operation] Waste Movement`
+
+### Test Plan Names
+- **Single Operation**: `"[Operation] Waste Movement - [Test Type] Test"`
+- **Multi-Step Workflow**: `"[Step 1] and [Step 2] Waste Movement - [Test Type] Test"`
+- **Examples**: 
+  - `"Create Waste Movement - Baseline Test"`
+  - `"Create and Update Waste Movement - Baseline Test"`
+  - `"Create Waste Movement - Spike Test"` (NOT "Create and Update" for single operation)
+
+### ThreadGroup Names
+- **Single Operation**: `"[Operation] Waste Movement"`
+- **Multi-Step Workflow**: `"[Step 1] and [Step 2] Waste Movement"`
+- **Spike Test Phases**: `"Spike Phase [X] - [Description]"`
+- **Examples**:
+  - `"Create Waste Movement"`
+  - `"Create and Update Waste Movement"`
+  - `"Spike Phase 1 - Low Load"`
+  - `"Spike Phase 2 - High Load"`
+  - `"Spike Phase 3 - Recovery"`
+- **Avoid**: Static user counts (e.g., "1 User") - use configuration properties instead
+
+### HTTP Sampler Names
+- **Clear Operation**: `"[Operation] Waste Movement"`
+- **Examples**: `"Create Waste Movement"`, `"Update Waste Movement"`
+
+### JSR223PreProcessor Names
+- **Authentication**: `"Get Access Token"`
+- **Payload Generation**: `"Generate [Operation] Waste Movement Payload"`
+- **Examples**: 
+  - `"Generate Create Waste Movement Payload"`
+  - `"Generate Update Waste Movement Payload"`
+
+### Response Assertion Names
+- **Specific Validation**: `"Verify [Operation] Response Success"`
+- **Examples**: 
+  - `"Verify Create Response Success"`
+  - `"Verify Update Response Success"`
+
+### PostProcessor Names
+- **Data Extraction**: `"Extract [Data Type]"`
+- **Examples**: `"Extract Global Movement ID"`
+
+### Naming Principles
+- **Descriptive**: Names should clearly describe what the component does
+- **Consistent**: Use consistent patterns across all test files
+- **Workflow-Aware**: For multi-step tests, names should reflect the complete workflow
+- **No Static Values**: Avoid hardcoded user counts or other configuration values
+- **Operation-Specific**: Test plan names should match the actual operations being performed
 
 ## Goal
 Create portable, maintainable test plans that focus purely on the test flow and business logic, with all configuration externalized to command-line scripts and property files.

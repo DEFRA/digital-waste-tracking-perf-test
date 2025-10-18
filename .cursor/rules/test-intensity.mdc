@@ -7,28 +7,45 @@ alwaysApply: true
 # Test Intensity Guidelines
 
 ## Load Tests (Normal Expected Load)
-- **User Count**: 10-50 users
-- **Duration**: Medium to Long (15-30 minutes)
-- **Purpose**: Test performance under normal expected load
-- **When to use**: Regular performance testing, CI/CD pipelines, capacity planning
-- **Ramp-up**: Gradual increase over 2-5 minutes
-- **Think Time**: 1-3 seconds between requests
+
+### Create Operations (Single Step)
+- **User Count**: 30 users
+- **Duration**: 30 minutes (1800s)
+- **Ramp-up**: 3 minutes (180s)
+- **Think Time**: 500±1000ms (500-1500ms total)
+- **Purpose**: Test performance under normal expected load for simple operations
+
+### Update Operations (Two-Step Workflow)
+- **User Count**: 30 users
+- **Duration**: 30 minutes (1800s)
+- **Ramp-up**: 3 minutes (180s)
+- **Think Time**: 500±1000ms (500-1500ms total)
+- **Purpose**: Test performance under normal expected load for complex workflows
 
 ## Stress Tests (Beyond Normal Capacity)
-- **User Count**: 25-50+ users
-- **Duration**: Long (30+ minutes)
-- **Purpose**: Find breaking points, test resilience
-- **When to use**: Capacity planning, finding service limits
-- **Ramp-up**: Gradual increase over 5-10 minutes
-- **Think Time**: 0.5-2 seconds between requests
+
+### Create Operations (Single Step)
+- **User Count**: 50 users
+- **Duration**: 30 minutes (1800s)
+- **Ramp-up**: 5 minutes (300s)
+- **Think Time**: 500±1000ms (500-1500ms total)
+- **Purpose**: Find breaking points for simple operations
+
+### Update Operations (Two-Step Workflow)
+- **User Count**: 50 users
+- **Duration**: 30 minutes (1800s)
+- **Ramp-up**: 5 minutes (300s)
+- **Think Time**: 500±1000ms (500-1500ms total)
+- **Purpose**: Find breaking points for complex workflows
 
 ## Spike Tests (Sudden Load Bursts)
-- **User Count**: Variable (5→50→5 users)
-- **Duration**: Medium (10-20 minutes)
-- **Purpose**: Test handling of sudden load spikes
-- **When to use**: Traffic burst testing, recovery testing
-- **Ramp-up**: Quick spike up, sustain, quick spike down
-- **Think Time**: 0.5-1 second between requests
+
+### Both Create and Update Operations
+- **Phase 1**: 5 users, 30s ramp-up, 5min duration (baseline)
+- **Phase 2**: 50 users, 5s ramp-up, 1min duration (dramatic spike)
+- **Phase 3**: 5 users, 10s ramp-up, 5min duration (recovery)
+- **Total Duration**: ~11 minutes (5min + 1min + 5min)
+- **Think Time**: 500±1000ms (500-1500ms total)
 
 ## Test Selection Guidelines
 - Start with load tests to establish baseline

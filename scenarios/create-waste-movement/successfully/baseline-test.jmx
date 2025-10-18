@@ -3,8 +3,8 @@
   <hashTree>
     <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Create Waste Movement - Baseline Test">
       <boolProp name="TestPlan.functional_mode">false</boolProp>
-      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
-      <elementProp name="TestPlan.arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+      <boolProp name="TestPlan.serialize_threadgroups">true</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
         <collectionProp name="Arguments.arguments">
           <elementProp name="testType" elementType="Argument">
             <stringProp name="Argument.name">testType</stringProp>
@@ -15,7 +15,23 @@
       </elementProp>
     </TestPlan>
     <hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Baseline Test - 1 User">
+      <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Get Access Token">
+        <stringProp name="scriptLanguage">groovy</stringProp>
+        <stringProp name="filename">scripts/get_accessToken.groovy</stringProp>
+        <stringProp name="parameters"></stringProp>
+        <stringProp name="cacheKey">false</stringProp>
+        <stringProp name="script"></stringProp>
+      </JSR223PreProcessor>
+      <hashTree/>
+      <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Generate Create Waste Movement Payload" enabled="true">
+        <stringProp name="scriptLanguage">groovy</stringProp>
+        <stringProp name="filename">scripts/create_waste_movement_payload.groovy</stringProp>
+        <stringProp name="parameters"></stringProp>
+        <stringProp name="cacheKey">false</stringProp>
+        <stringProp name="script"></stringProp>
+      </JSR223PreProcessor>
+      <hashTree/>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Create Waste Movement" enabled="true">
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">1</intProp>
         <longProp name="ThreadGroup.delay">0</longProp>
@@ -27,62 +43,6 @@
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <!-- JSR223 PreProcessor for Base64 Encoding -->
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Encode client credentials to Base64" enabled="true">
-          <stringProp name="scriptLanguage">groovy</stringProp>
-          <stringProp name="filename">scripts/encode_credentials.groovy</stringProp>
-        </JSR223PreProcessor>
-        <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Get OAuth2 Token">
-          <stringProp name="HTTPSampler.embedded_url_re">.*</stringProp>
-          <intProp name="HTTPSampler.connect_timeout">60000</intProp>
-          <intProp name="HTTPSampler.response_timeout">60000</intProp>
-          <stringProp name="HTTPSampler.domain">${__P(authBaseUrl)}</stringProp>
-          <stringProp name="HTTPSampler.protocol">https</stringProp>
-          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
-          <stringProp name="HTTPSampler.path">/oauth2/token</stringProp>
-          <stringProp name="HTTPSampler.method">POST</stringProp>
-          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
-          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
-          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="HTTP Arguments">
-            <collectionProp name="Arguments.arguments">
-              <elementProp name="grant_type" elementType="HTTPArgument">
-                <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <stringProp name="Argument.value">client_credentials</stringProp>
-                <stringProp name="Argument.metadata">=</stringProp>
-                <boolProp name="HTTPArgument.use_equals">true</boolProp>
-                <stringProp name="Argument.name">grant_type</stringProp>
-              </elementProp>
-            </collectionProp>
-          </elementProp>
-        </HTTPSamplerProxy>
-        <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-            <collectionProp name="HeaderManager.headers">
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Content-Type</stringProp>
-                <stringProp name="Header.value">application/x-www-form-urlencoded</stringProp>
-              </elementProp>
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">${basic_auth_header}</stringProp>
-              </elementProp>
-            </collectionProp>
-          </HeaderManager>
-          <hashTree/>
-        </hashTree>
-        <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="Extract Access Token" enabled="true">
-          <stringProp name="JSONPostProcessor.referenceNames">accessToken</stringProp>
-          <stringProp name="JSONPostProcessor.jsonPathExprs">$.access_token</stringProp>
-          <stringProp name="JSONPostProcessor.match_numbers">1</stringProp>
-          <stringProp name="JSONPostProcessor.defaultValues">NOT_FOUND</stringProp>
-        </JSONPostProcessor>
-        <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Load and process JSON payload" enabled="true">
-          <stringProp name="scriptLanguage">groovy</stringProp>
-          <stringProp name="filename">scripts/create_waste_movement_payload.groovy</stringProp>
-        </JSR223PreProcessor>
-        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Waste Movement">
           <stringProp name="HTTPSampler.embedded_url_re">.*</stringProp>
           <intProp name="HTTPSampler.connect_timeout">60000</intProp>
@@ -94,20 +54,19 @@
           <stringProp name="HTTPSampler.method">POST</stringProp>
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
           <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
-          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="HTTP Arguments">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
             <collectionProp name="Arguments.arguments">
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <stringProp name="Argument.value">${payload}</stringProp>
-                <stringProp name="Argument.metadata">=</stringProp>
                 <boolProp name="HTTPArgument.use_equals">false</boolProp>
-                <stringProp name="Argument.name"></stringProp>
+                <stringProp name="Argument.value">${postPayload}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Content-Type</stringProp>
@@ -115,29 +74,29 @@
               </elementProp>
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">Bearer ${accessToken}</stringProp>
+                <stringProp name="Header.value">${__P(global_access_token)}</stringProp>
               </elementProp>
             </collectionProp>
           </HeaderManager>
           <hashTree/>
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Verify Create Response Success" enabled="true">
+            <collectionProp name="Assertion.test_strings">
+              <stringProp name="49586">200</stringProp>
+            </collectionProp>
+            <stringProp name="Assertion.custom_message"></stringProp>
+            <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+            <boolProp name="Assertion.assume_success">false</boolProp>
+            <intProp name="Assertion.test_type">2</intProp>
+          </ResponseAssertion>
+          <hashTree/>
+          <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="Extract Global Movement ID" enabled="true">
+            <stringProp name="JSONPostProcessor.referenceNames">globalMovementId</stringProp>
+            <stringProp name="JSONPostProcessor.jsonPathExprs">$.globalMovementId</stringProp>
+            <stringProp name="JSONPostProcessor.match_numbers">1</stringProp>
+            <stringProp name="JSONPostProcessor.defaultValues">NOT_FOUND</stringProp>
+          </JSONPostProcessor>
+          <hashTree/>
         </hashTree>
-        <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
-          <collectionProp name="Asserion.test_strings">
-            <stringProp name="">200</stringProp>
-          </collectionProp>
-          <stringProp name="Assertion.custom_message"></stringProp>
-          <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
-          <boolProp name="Assertion.assume_success">false</boolProp>
-          <intProp name="Assertion.test_type">2</intProp>
-        </ResponseAssertion>
-        <hashTree/>
-        <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="Extract Global Movement ID" enabled="true">
-          <stringProp name="JSONPostProcessor.referenceNames">globalMovementId</stringProp>
-          <stringProp name="JSONPostProcessor.jsonPathExprs">$.globalMovementId</stringProp>
-          <stringProp name="JSONPostProcessor.match_numbers">1</stringProp>
-          <stringProp name="JSONPostProcessor.defaultValues">NOT_FOUND</stringProp>
-        </JSONPostProcessor>
-        <hashTree/>
       </hashTree>
     </hashTree>
   </hashTree>

@@ -1,48 +1,47 @@
 #!/bin/bash
 
+# Exit on error
 set -e
+
+# Load environment variables if present
+if [ -f "./env.sh" ]; then
+  echo "env.sh file found"
+  source ./env.sh
+else
+  echo "env.sh file not found"
+fi
+
+# Clean up previous test results
+for fileorFolder in ./reports ./results.jtl ./jmeter.log; do
+  if [ -f "$fileorFolder" ] || [ -d "$fileorFolder" ]; then
+    rm -rf "$fileorFolder"
+  fi
+done
 
 echo "Running tests locally"
 
-source ./env.sh
+# Run all JMX files in scenarios folder (including subdirectories)
+find scenarios -name "*.jmx" -type f | while read -r jmx_file; do
+  echo "Running: $(basename "$jmx_file")"
+  jmeter -n -t "$jmx_file" -l results.jtl -j jmeter.log \
+    -Jenvironment=${ENVIRONMENT} \
+    -JorganisationApiId=${ORGANISATION_API_ID} \
+    -JclientId=${COGNITO_CLIENT_ID} \
+    -JclientSecret=${COGNITO_CLIENT_SECRET} \
+    -JauthBaseUrl=${COGNITO_OAUTH_BASE_URL} \
+    -Jresultcollector.action_if_file_exists=APPEND 
+done
 
-if [ -f "reports/index.html" ]; then
-  rm -rf reports/
+# Generate report from combined results
+echo "Generating consolidated report..."
+jmeter -g results.jtl -e -o reports/ -j jmeter.log
+
+echo "All tests completed"
+if command -v open >/dev/null 2>&1; then
+  echo "Opening report in browser..."
+  open reports/index.html
+else
+  echo "Report generated at: reports/index.html"
 fi
-
-if [ -f "results.jtl" ]; then
-  rm -rf results.jtl
-fi
-
-if [ -f "jmeter.log" ]; then
-  rm -rf jmeter.log
-fi
-
-jmeter -n -t scenarios/create-waste-movement/successfully/baseline-test.jmx -l results.jtl -e -o reports/ \
-  -Jenvironment=${ENVIRONMENT} \
-  -JorganisationApiId=${ORGANISATION_API_ID} \
-  -JclientId=${COGNITO_CLIENT_ID} \
-  -JclientSecret=${COGNITO_CLIENT_SECRET} \
-  -JauthBaseUrl=${COGNITO_OAUTH_BASE_URL} \
-  -Jjmeter.save.saveservice.response_data=true \
-  -Jjmeter.save.saveservice.samplerData=true \
-  -Jjmeter.save.saveservice.requestHeaders=true \
-  -Jjmeter.save.saveservice.responseHeaders=true \
-  -Jjmeter.save.saveservice.assertions=true \
-  -Jjmeter.save.saveservice.subresults=true \
-  -Jjmeter.save.saveservice.bytes=true \
-  -Jjmeter.save.saveservice.latency=true \
-  -Jjmeter.save.saveservice.connect_time=true \
-  -Jjmeter.save.saveservice.thread_counts=true \
-  -Jjmeter.save.saveservice.timestamp_format=ms \
-  -Jjmeter.save.saveservice.print_field_names=true \
-  -Jjmeter.save.saveservice.response_data=true \
-  -Jjmeter.save.saveservice.samplerData=true \
-  -Jjmeter.save.saveservice.requestHeaders=true \
-  -Jjmeter.save.saveservice.responseHeaders=true \
-
-echo "Tests completed"
-
-open reports/index.html
 
 exit 0

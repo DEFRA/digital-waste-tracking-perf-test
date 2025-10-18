@@ -5,7 +5,7 @@ String timestamp = new Date().format("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
 String threadNum = ctx.getThreadNum().toString()
 
 // JSON payload as string with interpolation
-String postPayload = """{
+String putPayload = """{
   "organisationApiId": "${organisationApiId}",
   "dateTimeReceived": "${timestamp}",
   "wasteItems": [
@@ -13,7 +13,7 @@ String postPayload = """{
       "ewcCodes": [
         "020101"
       ],
-      "wasteDescription": "Create Waste Movement: ${testType} - ${threadNum}",
+      "wasteDescription": "Update Waste Movement: ${testType} - ${threadNum}",
       "physicalForm": "Mixed",
       "numberOfContainers": 3,
       "typeOfContainers": "SKI",
@@ -53,4 +53,4 @@ String postPayload = """{
 }"""
 
 // Set the payload variable
-vars.put("postPayload", postPayload)
+vars.put("putPayload", putPayload)

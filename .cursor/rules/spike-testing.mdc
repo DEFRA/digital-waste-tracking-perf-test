@@ -1,0 +1,156 @@
+---
+description: Spike Testing Patterns and Configuration
+globs:
+alwaysApply: true
+---
+
+# Spike Testing Patterns
+
+## Overview
+Spike tests simulate sudden increases in load to test system behavior under stress and recovery capabilities. This repository uses a 3-phase approach for comprehensive spike testing.
+
+## Spike Test Structure
+
+### 3-Phase Pattern
+1. **Phase 1 - Low Load**: Establish baseline performance
+2. **Phase 2 - High Load**: Apply sudden stress to the system
+3. **Phase 3 - Recovery**: Test system recovery to normal load
+
+### Phase Configuration
+- **Phase 1 - Low Load**: 5 users, 30s ramp-up, 300s duration
+- **Phase 2 - High Load**: 50 users, 5s ramp-up, 60s duration
+- **Phase 3 - Recovery**: 5 users, 10s ramp-up, 300s duration
+- **Total Duration**: ~11 minutes (5min + 1min + 5min)
+
+## ThreadGroup Configuration
+
+### Phase 1 - Low Load
+```xml
+<ThreadGroup testname="Spike Phase 1 - Low Load">
+  <intProp name="ThreadGroup.num_threads">5</intProp>
+  <intProp name="ThreadGroup.ramp_time">30</intProp>
+  <longProp name="ThreadGroup.duration">300</longProp>
+  <boolProp name="ThreadGroup.scheduler">true</boolProp>
+</ThreadGroup>
+```
+
+### Phase 2 - High Load
+```xml
+<ThreadGroup testname="Spike Phase 2 - High Load">
+  <intProp name="ThreadGroup.num_threads">50</intProp>
+  <intProp name="ThreadGroup.ramp_time">5</intProp>
+  <longProp name="ThreadGroup.duration">60</longProp>
+  <boolProp name="ThreadGroup.scheduler">true</boolProp>
+</ThreadGroup>
+```
+
+### Phase 3 - Recovery
+```xml
+<ThreadGroup testname="Spike Phase 3 - Recovery">
+  <intProp name="ThreadGroup.num_threads">5</intProp>
+  <intProp name="ThreadGroup.ramp_time">10</intProp>
+  <longProp name="ThreadGroup.duration">300</longProp>
+  <boolProp name="ThreadGroup.scheduler">true</boolProp>
+</ThreadGroup>
+```
+
+## Key Properties
+
+### ThreadGroup Properties
+- **Scheduler**: `ThreadGroup.scheduler=true` - Enable duration-based execution
+- **Duration**: `ThreadGroup.duration=300/60/300` - 5min/1min/5min per phase
+- **Ramp-up**: Gradual user increase (30s for Phase 1, 5s for Phase 2, 10s for Phase 3)
+- **User Count**: 5 → 50 → 5 users across phases
+- **Error Handling**: `ThreadGroup.on_sample_error=continue`
+- **User Persistence**: `ThreadGroup.same_user_on_next_iteration=true`
+
+### Loop Controller
+- **Loops**: `LoopController.loops=-1` - Infinite loops during duration
+- **Continue Forever**: `LoopController.continue_forever=false` - Stop when duration reached
+
+## Think Time Configuration
+- **Timer**: UniformRandomTimer at Test Plan level
+- **Base Delay**: 500ms
+- **Random Range**: 1000ms (500-1500ms total)
+- **Purpose**: Simulate realistic user behavior between requests
+
+## Naming Conventions
+
+### ThreadGroup Names
+- `"Spike Phase 1 - Low Load"`
+- `"Spike Phase 2 - High Load"`
+- `"Spike Phase 3 - Recovery"`
+
+### Test Plan Names
+- `"Create Waste Movement - Spike Test"`
+- `"Create and Update Waste Movement - Spike Test"`
+
+## Benefits of 3-Phase Approach
+
+### Phase 1 - Low Load
+- Establishes baseline performance metrics
+- Warms up the system
+- Provides comparison data for stress phase
+
+### Phase 2 - High Load
+- Tests system behavior under sudden stress
+- Identifies breaking points and bottlenecks
+- Measures response time degradation
+
+### Phase 3 - Recovery
+- Tests system recovery capabilities
+- Validates that system returns to normal performance
+- Ensures no permanent damage from stress phase
+
+## Monitoring Points
+
+### Key Metrics to Track
+- **Response Time**: Average, 90th percentile, maximum
+- **Throughput**: Requests per second
+- **Error Rate**: Percentage of failed requests
+- **Resource Utilization**: CPU, memory, database connections
+
+### Phase-Specific Monitoring
+- **Phase 1**: Baseline metrics for comparison
+- **Phase 2**: Peak stress metrics and error rates
+- **Phase 3**: Recovery time and return to baseline
+
+## Best Practices
+
+### Test Design
+- Use realistic user counts for each phase
+- Ensure sufficient ramp-up time for gradual load increase
+- Monitor system resources throughout all phases
+- Include proper error handling and assertions
+
+### Data Analysis
+- Compare metrics across all three phases
+- Identify performance degradation patterns
+- Document recovery time and behavior
+- Track error rates and failure modes
+
+### Maintenance
+- Adjust user counts based on system capacity
+- Modify phase durations based on test objectives
+- Update think time to match real user behavior
+- Review and update assertions for new API versions
+
+## Common Issues
+
+### Load Too High
+- System becomes unresponsive
+- High error rates
+- Resource exhaustion
+- Solution: Reduce Phase 2 user count
+
+### Load Too Low
+- No meaningful stress testing
+- System handles load easily
+- No performance insights
+- Solution: Increase Phase 2 user count
+
+### Recovery Issues
+- System doesn't return to baseline
+- Performance remains degraded
+- Resource leaks or memory issues
+- Solution: Investigate system architecture and resource management

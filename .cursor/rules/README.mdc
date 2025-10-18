@@ -14,11 +14,13 @@ This directory contains comprehensive rules for LLMs working on this performance
 - **`performance-testing.mdc`** - Core principles and focus areas for performance testing
 - **`test-intensity.mdc`** - Guidelines for load, stress, and spike testing
 - **`jmx-structure.mdc`** - Standards for JMX file organization and structure
+- **`spike-testing.mdc`** - Detailed patterns and configuration for spike tests
 
 ### Technical Rules
 - **`payload-management.mdc`** - Rules for managing shared JSON payload files
 - **`environment-management.mdc`** - Environment variable configuration and security
 - **`cdp-integration.mdc`** - CDP Platform specific considerations and integration
+- **`shared-authentication.mdc`** - Shared authentication patterns and implementation
 - **`documentation.mdc`** - Documentation standards and requirements
 
 ### Workflow Rules
@@ -35,10 +37,11 @@ This directory contains comprehensive rules for LLMs working on this performance
 
 ## Quick Reference
 
-- **Test Organization**: `scenarios/load/`, `scenarios/stress/`, `scenarios/spike/`
-- **Payload Files**: `payloads/create.json`, `payloads/update.json`
+- **Test Organization**: `scenarios/create-waste-movement/successfully/`, `scenarios/update-waste-movement/successfully/`
+- **Payload Scripts**: `scripts/create_waste_movement_payload.groovy`, `scripts/update_waste_movement_payload.groovy`
+- **Authentication**: `scripts/get_accessToken.groovy` (shared across all tests)
 - **Key Documentation**: `TEST_ORGANIZATION.md`, `PAYLOAD_STRUCTURE.md`
-- **Focus Areas**: Load testing (10-50 users), Stress testing (25-50+ users), Spike testing (5→50→5 users)
+- **Focus Areas**: Load testing (10-50 users), Stress testing (25-50+ users), Spike testing (3-phase: 5→30→5 users)
 
 ## Usage
 

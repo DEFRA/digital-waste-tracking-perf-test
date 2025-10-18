@@ -10,34 +10,97 @@ alwaysApply: true
 - This is a JMeter-based performance testing repository for CDP Platform
 - Focus is on load, stress, and spike testing only
 - Functional testing is handled by a separate regression pack
-- Tests use external JSON payload files for reusability
+- Tests use Groovy scripts for dynamic payload generation
 
 ## Key Files to Understand
 - `scenarios/` - Contains organized JMX test files by operation and test type
-- `payloads/` - Contains shared JSON payload files
-- `TEST_ORGANIZATION.md` - Test structure and usage guide
-- `PAYLOAD_STRUCTURE.md` - Payload file documentation
+- `scripts/get_accessToken.groovy` - Shared authentication script for token management
+- `scripts/create_waste_movement_payload.groovy` - Dynamic payload generation for create operations (sets `${postPayload}`)
+- `scripts/update_waste_movement_payload.groovy` - Dynamic payload generation for update operations (sets `${putPayload}`)
+- `local-entrypoint.sh` - Local development script with shared authentication
 - `entrypoint.sh` - Docker container entry point
 - `Dockerfile` - Container configuration
 
 ## Test Organization
 - `scenarios/create-waste-movement/successfully/` - Create operation tests
-- `scenarios/update-waste-movement/successfully/` - Update operation tests
-- Each operation has: `load-test.jmx`, `spike-test.jmx`, `stress-test.jmx`
+- `scenarios/update-waste-movement/successfully/` - Update operation tests (two-step workflow: create + update)
+- Each operation has: `baseline-test.jmx`, `load-test.jmx`, `spike-test.jmx`, `stress-test.jmx`
 
 ## When Making Changes
 1. Always consider the performance testing focus
 2. Maintain the organized folder structure
-3. Use shared payload files instead of embedded JSON
+3. Use Groovy scripts for dynamic payload generation instead of embedded JSON
 4. Follow naming conventions and documentation standards
 5. Test changes locally before suggesting them
+6. Use descriptive names that clearly indicate what each component does
+7. For multi-step workflows, names should reflect the complete process
+8. Use `${postPayload}` for POST/create operations and `${putPayload}` for PUT/update operations
 
 ## Common Tasks
 - Adding new performance tests
 - Modifying existing test configurations
-- Updating payload files for API changes
+- Updating Groovy payload scripts for API changes
 - Organizing tests by intensity level
 - Updating documentation
+- Managing shared authentication across multiple JMX files
+
+## Test Configurations (Reference)
+
+### Create Waste Movement Tests (Single Step Operations)
+- **Baseline**: 1 user, 1 iteration, think time 500±1000ms
+- **Load**: 30 users, 180s ramp-up, 1800s duration (30 min), think time 500±1000ms
+- **Spike**: 3-phase test (5→50→5 users), 5min/1min/5min per phase, think time 500±1000ms
+- **Stress**: 50 users, 300s ramp-up, 1800s duration (30 min), think time 500±1000ms
+
+### Create and Update Waste Movement Tests (Two-Step Workflow)
+- **Baseline**: 1 user, 1 iteration, think time 500±1000ms
+- **Load**: 30 users, 180s ramp-up, 1800s duration (30 min), think time 500±1000ms
+- **Spike**: 3-phase test (5→50→5 users), 5min/1min/5min per phase, think time 500±1000ms
+- **Stress**: 50 users, 300s ramp-up, 1800s duration (30 min), think time 500±1000ms
+
+### Spike Test Pattern (Multi-Phase)
+- **Phase 1 - Low Load**: 5 users, 30s ramp-up, 300s duration
+- **Phase 2 - High Load**: 50 users, 5s ramp-up, 60s duration
+- **Phase 3 - Recovery**: 5 users, 10s ramp-up, 300s duration
+- **Total Duration**: ~11 minutes
+- **Think Time**: 500±1000ms (UniformRandomTimer)
+
+## Realistic Testing Metrics Guidelines
+
+### Load Testing (Normal Expected Load)
+
+#### Create Operations (Single Step)
+- **User Count**: 30 users (60% of spike peak)
+- **Duration**: 30 minutes (sufficient for meaningful data)
+- **Ramp-up**: 3 minutes (gradual increase)
+- **Think Time**: 500±1000ms (realistic user behavior for simple operations)
+
+#### Update Operations (Two-Step Workflow)
+- **User Count**: 30 users (60% of spike peak)
+- **Duration**: 30 minutes (sufficient for meaningful data)
+- **Ramp-up**: 3 minutes (gradual increase)
+- **Think Time**: 500±1000ms (realistic user behavior for complex workflows)
+
+### Stress Testing (Beyond Normal Capacity)
+
+#### Create Operations (Single Step)
+- **User Count**: 50 users (100% of spike peak)
+- **Duration**: 30 minutes (focused stress testing)
+- **Ramp-up**: 5 minutes (gradual increase to stress level)
+- **Think Time**: 500±1000ms (maintain realistic behavior)
+
+#### Update Operations (Two-Step Workflow)
+- **User Count**: 50 users (100% of spike peak)
+- **Duration**: 30 minutes (focused stress testing)
+- **Ramp-up**: 5 minutes (gradual increase to stress level)
+- **Think Time**: 500±1000ms (maintain realistic behavior for complex workflows)
+
+### Spike Testing (Sudden Load Bursts)
+- **Phase 1**: 5 users, 30s ramp-up, 5min duration (baseline)
+- **Phase 2**: 50 users, 5s ramp-up, 1min duration (dramatic spike)
+- **Phase 3**: 5 users, 10s ramp-up, 5min duration (recovery)
+- **Total Duration**: ~11 minutes (5min + 1min + 5min)
+- **Think Time**: 500±1000ms (consistent across phases)
 
 ## What NOT to Do
 - Don't add functional testing (handled by regression pack)
@@ -52,3 +115,6 @@ alwaysApply: true
 - Use consistent naming and structure
 - Focus on performance testing objectives
 - Maintain compatibility with CDP Platform
+- Use descriptive names that explain functionality, not implementation details
+- Avoid static values in names (user counts, etc.) - use configuration instead
+- For complex workflows, ensure names reflect the complete process
