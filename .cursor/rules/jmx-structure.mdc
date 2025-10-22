@@ -51,10 +51,10 @@ alwaysApply: true
 - **Example**: 1 user, 1 loop = single request for functional validation
 
 ### Spike Test Pattern (Multi-Phase Execution)
-- **Phase 1 - Low Load**: 5 users, 30s ramp-up, 120s duration
-- **Phase 2 - High Load**: 30 users, 10s ramp-up, 120s duration  
-- **Phase 3 - Recovery**: 5 users, 10s ramp-up, 120s duration
-- **Total Duration**: ~6 minutes (2 minutes per phase)
+- **Phase 1 - Low Load**: 5 users, 30s ramp-up, 300s duration
+- **Phase 2 - High Load**: 50 users, 5s ramp-up, 60s duration  
+- **Phase 3 - Recovery**: 5 users, 10s ramp-up, 300s duration
+- **Total Duration**: ~11 minutes (5min + 1min + 5min)
 - **Purpose**: Test system behavior under sudden load spikes and recovery
 
 ### Thread Group Properties
@@ -66,47 +66,83 @@ alwaysApply: true
 - **Scheduler**: `ThreadGroup.scheduler=true` - enable duration-based execution
 - **Duration**: `ThreadGroup.duration=[seconds]` - test duration in seconds
 
-## "Before All" Hook Pattern
+## Standard JMX File Structure Pattern
 
-### Data Setup Outside Thread Groups
-- **Authentication**: JSR223PreProcessor at Test Plan level for shared token
-- **Payload Generation**: JSR223PreProcessor at Test Plan level for dynamic data
-- **Global Variables**: Set in User Defined Variables section
-- **Shared Resources**: Configure once, use across all threads
+### Test Plan Level Components
+1. **User Defined Variables**: Set `testType` parameter for test-specific customization
+2. **Payload Generation**: JSR223PreProcessor for dynamic data generation
+3. **Shared Authentication**: JSR223PreProcessor for token management
+4. **Think Time**: UniformRandomTimer for realistic user behavior
 
 ### Implementation Pattern
 ```xml
 <TestPlan>
+  <elementProp name="TestPlan.user_defined_variables" elementType="Arguments">
+    <collectionProp name="Arguments.arguments">
+      <elementProp name="testType" elementType="Argument">
+        <stringProp name="Argument.name">testType</stringProp>
+        <stringProp name="Argument.value">Baseline</stringProp>
+      </elementProp>
+    </collectionProp>
+  </elementProp>
   <hashTree>
-    <!-- BEFORE ALL: Payload Generation -->
+    <!-- Payload Generation -->
     <JSR223PreProcessor testname="Generate Create Waste Movement Payload">
       <stringProp name="filename">scripts/create_waste_movement_payload.groovy</stringProp>
     </JSR223PreProcessor>
     
-    <!-- BEFORE ALL: Authentication -->
+    <!-- Shared Authentication -->
     <JSR223PreProcessor testname="Get Access Token">
       <stringProp name="filename">scripts/get_accessToken.groovy</stringProp>
     </JSR223PreProcessor>
     
-    <!-- THREAD GROUP: Actual Test Execution -->
+    <!-- Thread Groups -->
     <ThreadGroup>
       <!-- Test logic here -->
     </ThreadGroup>
+    
+    <!-- Think Time Timer -->
+    <UniformRandomTimer testname="Think Time">
+      <stringProp name="ConstantTimer.delay">500</stringProp>
+      <stringProp name="RandomTimer.range">1000</stringProp>
+    </UniformRandomTimer>
   </hashTree>
 </TestPlan>
 ```
 
-### Benefits of "Before All" Pattern
+### Benefits of Standard Pattern
 - **Single Authentication**: Authenticate once, reuse across all threads
 - **Consistent Data**: Generate payloads once, use across all users
 - **Performance**: Avoid repeated setup overhead
 - **Maintainability**: Centralized data preparation logic
+- **Realistic Behavior**: Think time simulation for all tests
+
+## Standard JMX File Components
+
+### Required Components for All JMX Files
+1. **Test Plan Level**:
+   - User Defined Variables with `testType` parameter
+   - JSR223PreProcessor for payload generation
+   - JSR223PreProcessor for shared authentication
+   - UniformRandomTimer for think time (500ms base + 1000ms range)
+
+2. **Thread Group Level**:
+   - HTTP Samplers with HTTP Arguments configuration
+   - HeaderManager for Content-Type and Authorization
+   - ResponseAssertion for success validation
+   - JSONPostProcessor for data extraction (when needed)
+
+3. **HTTP Sampler Configuration**:
+   - Use `${__P(environment)}` for domain configuration
+   - Set `postBodyRaw=false` for JSON payloads
+   - Use HTTP Arguments with empty name for request body
+   - Set `always_encode=false` and `use_equals=false`
 
 ### ❌ EXCLUDE from .jmx files:
 1. **Configuration Data**
-   - User Defined Variables (use properties instead)
    - Hardcoded URLs, credentials, or environment-specific values
    - File paths and output locations
+   - Result collection settings
 
 2. **Result Collection Settings**
    - ResultCollector configurations
@@ -131,6 +167,28 @@ alwaysApply: true
 - **Separation**: Keep business logic in .jmx, configuration in scripts
 
 ## HTTP Request Configuration for Complex JSON
+
+### Standard HTTP Sampler Pattern
+```xml
+<HTTPSamplerProxy testname="Create Waste Movement">
+  <stringProp name="HTTPSampler.domain">waste-movement-external-api.api.${__P(environment)}.cdp-int.defra.cloud</stringProp>
+  <stringProp name="HTTPSampler.protocol">https</stringProp>
+  <stringProp name="HTTPSampler.path">/movements/receive</stringProp>
+  <stringProp name="HTTPSampler.method">POST</stringProp>
+  <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+  <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+    <collectionProp name="Arguments.arguments">
+      <elementProp name="" elementType="HTTPArgument">
+        <boolProp name="HTTPArgument.always_encode">false</boolProp>
+        <boolProp name="HTTPArgument.use_equals">false</boolProp>
+        <stringProp name="Argument.value">${postPayload}</stringProp>
+      </elementProp>
+    </collectionProp>
+  </elementProp>
+</HTTPSamplerProxy>
+```
+
+### Key Configuration Rules
 - **Use HTTP Arguments**: Set `postBodyRaw=false` and use HTTP Arguments for complex JSON
 - **Variable Substitution**: Use `${postPayload}` for POST/create operations and `${putPayload}` for PUT/update operations
 - **Avoid postBodyRaw**: Don't use `postBodyRaw=true` with complex JSON variable substitution

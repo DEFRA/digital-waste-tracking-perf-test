@@ -7,50 +7,109 @@ else
   echo "env.sh file not found"
 fi
 
-echo "run_id: $RUN_ID in $ENVIRONMENT"
+# Fail the script if certain environment variables are not set
+required_variables=(ENVIRONMENT TEST_SCENARIO CI COGNITO_CLIENT_ID COGNITO_CLIENT_SECRET COGNITO_OAUTH_BASE_URL ORGANISATION_API_ID)
+for variable in "${required_variables[@]}"; do
+  if [ -z "${!variable}" ]; then
+    echo "Error: ${variable} is not set"
+    exit 1
+  fi
+done
 
+# Log the run_id and environment if CI is true
+if [ $CI == "true" ]; then
+  echo "\n\nrun_id: $RUN_ID in $ENVIRONMENT"
+fi
+
+
+# Get the current date and time
 NOW=$(date +"%Y%m%d-%H%M%S")
 
-# if [ -z "${JM_HOME}" ]; then
-#   JM_HOME=/opt/perftest
-# fi
+REPO_LOCATION=$(dirname $(readlink -f $0))
 
-JM_SCENARIOS=${JM_HOME}/scenarios
-JM_REPORTS=${JM_HOME}/reports
-JM_LOGS=${JM_HOME}/logs
-
-mkdir -p ${JM_REPORTS} ${JM_LOGS}
-
-SCENARIOFILE=${JM_SCENARIOS}/${TEST_SCENARIO}.jmx
-REPORTFILE=${NOW}-perftest-${TEST_SCENARIO}-report.csv
+# Define the directories for the test results
+JM_SCENARIOS=${REPO_LOCATION}/scenarios
+JM_REPORTS=${REPO_LOCATION}/reports
+JM_LOGS=${REPO_LOCATION}/logs
+JM_RESULTS=${REPO_LOCATION}/results
+REPORTFILE=${JM_RESULTS}/${NOW}-perftest-${TEST_SCENARIO}-report.csv
 LOGFILE=${JM_LOGS}/perftest-${TEST_SCENARIO}.log
 
-# Run the test suite with environment variables as JMeter properties
-jmeter -n -t ${SCENARIOFILE} -e -l "${REPORTFILE}" -o ${JM_REPORTS} -j ${LOGFILE} \
-  -Jenv=${ENVIRONMENT} \
-  -JorganisationApiId=${ORGANISATION_API_ID} \
-  -JclientId=${COGNITO_CLIENT_ID} \
-  -JclientSecret=${COGNITO_CLIENT_SECRET} \
-  -JauthBaseUrl=${COGNITO_OAUTH_BASE_URL} \
-  -JbaseUrl=${BASE_URL}
-test_exit_code=$?
+# Clean up previous test results and create fresh directories
+for fileorFolder in ${JM_REPORTS} ${JM_LOGS} ${JM_RESULTS}; do
+  if [ -f "$fileorFolder" ] || [ -d "$fileorFolder" ]; then
+    rm -rf "$fileorFolder"
+    mkdir -p "$fileorFolder"
+  fi
+done
 
-# Publish the results into S3 so they can be displayed in the CDP Portal
-if [ -n "$RESULTS_OUTPUT_S3_PATH" ]; then
-  # Copy the CSV report file and the generated report files to the S3 bucket
-   if [ -f "$JM_REPORTS/index.html" ]; then
-      aws --endpoint-url=$S3_ENDPOINT s3 cp "$REPORTFILE" "$RESULTS_OUTPUT_S3_PATH/$REPORTFILE"
-      aws --endpoint-url=$S3_ENDPOINT s3 cp "$JM_REPORTS" "$RESULTS_OUTPUT_S3_PATH" --recursive
-      if [ $? -eq 0 ]; then
-        echo "CSV report file and test results published to $RESULTS_OUTPUT_S3_PATH"
-      fi
-   else
-      echo "$JM_REPORTS/index.html is not found"
-      exit 1
-   fi
+# Build list of JMX files to run
+if [ ${TEST_SCENARIO} == "all" ]; then
+  echo "\n\nRunning all scenarios"
+  # Build list of all JMX files in scenarios folder (including subdirectories)
+  jmx_files=$(find scenarios -name "*.jmx" -type f)
 else
-   echo "RESULTS_OUTPUT_S3_PATH is not set"
-   exit 1
+  echo "\n\nRunning scenario: ${TEST_SCENARIO}"
+  SCENARIOFILE=${JM_SCENARIOS}/${TEST_SCENARIO}
+  jmx_files="${SCENARIOFILE}"
+fi
+
+echo "\n\nUsing JM_SCENARIOS: $JM_SCENARIOS"
+echo "Using JM_REPORTS: $JM_REPORTS"
+echo "Using LOGFILE: $LOGFILE"
+echo "Using REPORTFILE: $REPORTFILE"
+echo "Using CI: $CI"
+echo "Using ENVIRONMENT: $ENVIRONMENT"
+
+
+# Run all JMX files in scenarios folder (including subdirectories)
+test_exit_code=0
+for jmx_file in $jmx_files; do
+  echo "\n\nRunning: $jmx_file\n\n"
+  jmeter -n -t "$jmx_file" -l "${REPORTFILE}" -j ${LOGFILE} \
+    -Jenvironment=${ENVIRONMENT} \
+    -JorganisationApiId=${ORGANISATION_API_ID} \
+    -JclientId=${COGNITO_CLIENT_ID} \
+    -JclientSecret=${COGNITO_CLIENT_SECRET} \
+    -JauthBaseUrl=${COGNITO_OAUTH_BASE_URL} \
+    -Jresultcollector.action_if_file_exists=APPEND
+  single_test_exit_code=$?
+    if [ $single_test_exit_code -ne 0 ]; then
+      echo "Error running: $(basename "$jmx_file"), error code: $single_test_exit_code"
+      test_exit_code=1
+    fi
+done
+
+# Generate report from combined results
+echo "\n\nGenerating consolidated report..."
+jmeter -g ${REPORTFILE} -e -o ${JM_REPORTS} -j ${LOGFILE} 
+
+if [ $CI == "true" ]; then
+  # Publish the results into S3 so they can be displayed in the CDP Portal
+  if [ -n "$RESULTS_OUTPUT_S3_PATH" ]; then
+    # Copy the CSV report file and the generated report files to the S3 bucket
+    if [ -f "$JM_REPORTS/index.html" ]; then
+        aws --endpoint-url=$S3_ENDPOINT s3 cp "$REPORTFILE" "$RESULTS_OUTPUT_S3_PATH/$(basename $REPORTFILE)"
+        aws --endpoint-url=$S3_ENDPOINT s3 cp "$JM_REPORTS" "$RESULTS_OUTPUT_S3_PATH" --recursive
+        if [ $? -eq 0 ]; then
+          echo "CSV report file and test results published to $RESULTS_OUTPUT_S3_PATH"
+        fi
+    else
+        echo "$JM_REPORTS/index.html is not found"
+        exit 1
+    fi
+  else
+    echo "RESULTS_OUTPUT_S3_PATH is not set"
+    exit 1
+  fi
+elif [ $CI == "false" ]; then
+  echo "All tests completed"
+  if command -v open >/dev/null 2>&1; then
+    echo "Opening report in browser..."
+    open ${JM_REPORTS}/index.html
+  else
+    echo "Report generated at: ${JM_REPORTS}/index.html"
+  fi
 fi
 
 exit $test_exit_code

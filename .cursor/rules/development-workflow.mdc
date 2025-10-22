@@ -44,11 +44,43 @@ alwaysApply: true
 
 ## Environment Configuration
 1. Use `env.sh` for local development environment variables
-2. Use entrypoint scripts (`local-entrypoint.sh`, `entrypoint.sh`) to pass environment variables as JMeter properties
+2. Use `entrypoint.sh` script to pass environment variables as JMeter properties
 3. Never commit sensitive credentials to the repository
 4. Use `env.sh.template` as a template for required environment variables
 5. Load environment variables before running JMeter tests
 6. Use `${__P(propertyName)}` in JMeter test plans to access properties
+
+## Running JMeter Tests
+
+### Using the Entrypoint Script
+1. **Set Environment Variables**: Ensure all required environment variables are set in `env.sh`
+2. **Run Single Test**: `./entrypoint.sh` (uses `TEST_SCENARIO` from `env.sh`)
+3. **Run All Tests**: Set `TEST_SCENARIO=all` in `env.sh` then run `./entrypoint.sh`
+4. **CI Mode**: Set `CI=true` in `env.sh` for CDP Platform execution
+
+### Required Environment Variables
+- `ENVIRONMENT`: Target environment (dev, test, perf-test, prod)
+- `TEST_SCENARIO`: JMX file path or "all" for all tests
+- `CI`: "true" for CDP Platform, "false" for local development
+- `COGNITO_CLIENT_ID`: OAuth2 client ID
+- `COGNITO_CLIENT_SECRET`: OAuth2 client secret
+- `COGNITO_OAUTH_BASE_URL`: OAuth2 base URL
+- `ORGANISATION_API_ID`: Organization API ID
+
+### Test Execution Flow
+1. **Cleanup**: Removes previous test results from `reports/`, `logs/`, `results/` directories
+2. **Authentication**: Gets OAuth2 token using shared authentication script
+3. **Test Execution**: Runs JMX files with proper environment variables
+4. **Report Generation**: Creates HTML report from CSV results
+5. **Output**: Opens report in browser (local) or uploads to S3 (CI)
+
+### Directory Structure
+- `scenarios/`: JMX test files organized by operation and test type
+- `scripts/`: Groovy scripts for authentication and payload generation
+- `reports/`: Generated HTML reports (gitignored)
+- `logs/`: JMeter execution logs (gitignored)
+- `results/`: CSV result files (gitignored)
+- `temp/`: Temporary files generated during test execution (gitignored)
 
 ## Documentation Updates
 1. Update relevant documentation when making changes
