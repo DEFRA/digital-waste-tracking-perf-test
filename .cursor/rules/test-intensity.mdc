@@ -6,6 +6,24 @@ alwaysApply: true
 
 # Test Intensity Guidelines
 
+## Baseline Tests (Functional Validation)
+
+### Create Operations (Single Step)
+- **User Count**: 1 user
+- **Duration**: Single request
+- **Ramp-up**: 1 second
+- **Think Time**: 500±1000ms (500-1500ms total)
+- **Response Time Threshold**: 2 seconds
+- **Purpose**: Functional validation and baseline metrics
+
+### Update Operations (Two-Step Workflow)
+- **User Count**: 1 user
+- **Duration**: Single request
+- **Ramp-up**: 1 second
+- **Think Time**: 500±1000ms (500-1500ms total)
+- **Response Time Threshold**: 2 seconds
+- **Purpose**: Functional validation and baseline metrics
+
 ## Load Tests (Normal Expected Load)
 
 ### Create Operations (Single Step)
@@ -13,6 +31,7 @@ alwaysApply: true
 - **Duration**: 30 minutes (1800s)
 - **Ramp-up**: 3 minutes (180s)
 - **Think Time**: 500±1000ms (500-1500ms total)
+- **Response Time Threshold**: 3 seconds
 - **Purpose**: Test performance under normal expected load for simple operations
 
 ### Update Operations (Two-Step Workflow)
@@ -20,6 +39,7 @@ alwaysApply: true
 - **Duration**: 30 minutes (1800s)
 - **Ramp-up**: 3 minutes (180s)
 - **Think Time**: 500±1000ms (500-1500ms total)
+- **Response Time Threshold**: 3 seconds
 - **Purpose**: Test performance under normal expected load for complex workflows
 
 ## Stress Tests (Beyond Normal Capacity)
@@ -29,6 +49,7 @@ alwaysApply: true
 - **Duration**: 30 minutes (1800s)
 - **Ramp-up**: 5 minutes (300s)
 - **Think Time**: 500±1000ms (500-1500ms total)
+- **Response Time Threshold**: 5 seconds
 - **Purpose**: Find breaking points for simple operations
 
 ### Update Operations (Two-Step Workflow)
@@ -36,6 +57,7 @@ alwaysApply: true
 - **Duration**: 30 minutes (1800s)
 - **Ramp-up**: 5 minutes (300s)
 - **Think Time**: 500±1000ms (500-1500ms total)
+- **Response Time Threshold**: 5 seconds
 - **Purpose**: Find breaking points for complex workflows
 
 ## Spike Tests (Sudden Load Bursts)
@@ -46,6 +68,27 @@ alwaysApply: true
 - **Phase 3**: 5 users, 10s ramp-up, 5min duration (recovery)
 - **Total Duration**: ~11 minutes (5min + 1min + 5min)
 - **Think Time**: 500±1000ms (500-1500ms total)
+- **Response Time Threshold**: 8 seconds (all phases)
+
+## Response Time Monitoring Strategy
+
+### APDEX (Application Performance Index)
+- **Purpose**: Measures user satisfaction with response times
+- **Scoring**: 0.0-1.0 scale (1.0 = excellent, 0.5 = poor, 0.0 = unacceptable)
+- **Zones**: Satisfied (≤500ms), Tolerating (500ms-1.5s), Frustrated (>1.5s)
+- **Use**: Business metrics, user experience reporting, trend analysis
+
+### DurationAssertion (Technical Failure Detection)
+- **Purpose**: Hard pass/fail threshold for test execution
+- **Scoring**: Binary (pass/fail) based on single request
+- **Thresholds**: Higher than APDEX zones to catch only catastrophic failures
+- **Use**: Test validation, CI/CD gates, immediate feedback
+
+### Alignment Strategy
+- **APDEX**: Shows user satisfaction (frustrated at >1.5s)
+- **DurationAssertion**: Catches technical failures (2s, 3s, 5s, 8s thresholds)
+- **Gap**: 0.5s-6.5s buffer allows user frustration before test failure
+- **Result**: Layered monitoring for both user experience and technical performance
 
 ## Test Selection Guidelines
 - Start with load tests to establish baseline
@@ -53,3 +96,5 @@ alwaysApply: true
 - Use spike tests to verify recovery capabilities
 - Adjust user counts based on service capacity
 - Monitor resource utilization during tests
+- Use APDEX scores for business reporting and user experience insights
+- Use DurationAssertion for technical failure detection and CI/CD gates

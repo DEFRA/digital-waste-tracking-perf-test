@@ -91,6 +91,10 @@
             <intProp name="Assertion.test_type">2</intProp>
           </ResponseAssertion>
           <hashTree/>
+          <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Response Time Threshold" enabled="true">
+            <stringProp name="DurationAssertion.duration">5000</stringProp>
+          </DurationAssertion>
+          <hashTree/>
           <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="Extract Global Movement ID" enabled="true">
             <stringProp name="JSONPostProcessor.referenceNames">globalMovementId</stringProp>
             <stringProp name="JSONPostProcessor.jsonPathExprs">$.globalMovementId</stringProp>
