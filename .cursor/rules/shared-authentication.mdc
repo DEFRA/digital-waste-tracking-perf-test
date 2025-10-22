@@ -1,0 +1,85 @@
+---
+description: Shared Authentication Rules
+globs:
+alwaysApply: true
+---
+
+# Shared Authentication Rules
+
+## Overview
+This repository uses a shared authentication approach to authenticate once and reuse the token across all JMX files in a test run. This improves performance and reduces authentication overhead.
+
+## Implementation
+
+### Core Components
+- **`scripts/get_accessToken.groovy`** - Main authentication script that handles token management
+- **`local-entrypoint.sh`** - Local development script that runs all JMX files with shared auth
+- **JMeter Properties** - Uses `resultcollector.action_if_file_exists=APPEND` for result consolidation
+
+### How It Works
+1. **First JMX file** - Authenticates and stores token in global properties
+2. **Subsequent JMX files** - Reuse the cached token from global properties
+3. **Result consolidation** - All results are appended to a single `results.jtl` file
+4. **Single report** - One consolidated report is generated at the end
+
+### JMX File Requirements
+Each JMX file must include:
+```xml
+<JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Get Access Token" enabled="true">
+  <stringProp name="scriptLanguage">groovy</stringProp>
+  <stringProp name="filename">scripts/get_accessToken.groovy</stringProp>
+</JSR223PreProcessor>
+```
+
+### Script Usage
+```bash
+# Run all JMX files with shared authentication
+./local-entrypoint.sh
+```
+
+## Benefits
+- ✅ **Single Authentication** - Authenticate once for entire test suite
+- ✅ **Faster Execution** - No repeated authentication overhead
+- ✅ **Consolidated Results** - All tests in one report
+- ✅ **Easy Maintenance** - Add new JMX files without auth changes
+- ✅ **Token Sharing** - Automatic token reuse across all tests
+
+## File Structure
+```
+scenarios/
+├── create-waste-movement/successfully/
+│   ├── baseline-test.jmx
+│   ├── load-test.jmx
+│   ├── stress-test.jmx
+│   └── spike-test.jmx
+└── update-waste-movement/successfully/
+    ├── baseline-test.jmx
+    ├── load-test.jmx
+    ├── stress-test.jmx
+    └── spike-test.jmx
+
+scripts/
+├── get_accessToken.groovy
+├── create_waste_movement_payload.groovy
+└── update_waste_movement_payload.groovy
+
+local-entrypoint.sh
+```
+
+## When Adding New Tests
+1. Create JMX file in appropriate `scenarios/` subdirectory
+2. Include the `get_accessToken.groovy` JSR223PreProcessor
+3. No need to add individual authentication logic
+4. Test will automatically use shared token
+
+## Troubleshooting
+- **Token not found**: Ensure `get_accessToken.groovy` is included in JMX file
+- **Authentication fails**: Check environment variables in `env.sh`
+- **Results not consolidated**: Verify `resultcollector.action_if_file_exists=APPEND` property
+- **Report not generated**: Check that all JMX files completed successfully
+
+## Best Practices
+- Always use the shared authentication approach for new tests
+- Don't add individual OAuth2 token requests to JMX files
+- Use the `local-entrypoint.sh` script for local development
+- Keep the `get_accessToken.groovy` script updated for API changes

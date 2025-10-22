@@ -1,0 +1,294 @@
+---
+description: JMX File Structure Rules
+globs:
+alwaysApply: true
+---
+
+# JMX File Structure Rules
+
+## File Organization
+- Organize JMX files by operation first, then test type
+- Structure: `scenarios/[operation]/successfully/[test-type]-test.jmx`
+- Examples: `create-waste-movement/successfully/load-test.jmx`, `update-waste-movement/successfully/stress-test.jmx`
+
+## JMX File Content Rules
+
+### ✅ INCLUDE in .jmx files:
+1. **Core Business Logic**
+   - HTTP Samplers (API requests)
+   - Request/Response flow and sequencing
+   - JSON PostProcessors for data extraction
+   - Response Assertions for validation
+
+2. **Authentication Flow**
+   - OAuth2 token requests
+   - Authorization headers and token usage
+   - JSR223 PreProcessors/PostProcessors for custom logic
+
+3. **Data Processing**
+   - JSON path expressions for extracting response data
+   - Variable references for passing data between requests
+   - Custom Groovy script references (external files only)
+
+4. **Test Structure**
+   - Thread Groups and execution order
+   - Loop controllers and iteration logic
+   - Basic test plan configuration
+
+## Thread Group Configuration Patterns
+
+### Duration-Based Execution (Recommended for Load/Stress/Spike Tests)
+- **Enable Scheduler**: `ThreadGroup.scheduler=true`
+- **Set Duration**: `ThreadGroup.duration=[seconds]` (e.g., 1800 for 30 minutes)
+- **Infinite Loops**: `LoopController.loops=-1` and `LoopController.continue_forever=false`
+- **Ramp-up**: `ThreadGroup.ramp_time=[seconds]` for gradual user increase
+- **Example**: 20 users, 300s ramp-up, 1800s duration = 5min ramp + 25min sustained load
+
+### Fixed-Loop Execution (Recommended for Baseline Tests)
+- **Disable Scheduler**: `ThreadGroup.scheduler=false` (or omit)
+- **Set Loop Count**: `LoopController.loops=[number]` (e.g., 1 for baseline)
+- **Disable Forever**: `LoopController.continue_forever=false`
+- **Example**: 1 user, 1 loop = single request for functional validation
+
+### Spike Test Pattern (Multi-Phase Execution)
+- **Phase 1 - Low Load**: 5 users, 30s ramp-up, 300s duration
+- **Phase 2 - High Load**: 50 users, 5s ramp-up, 60s duration  
+- **Phase 3 - Recovery**: 5 users, 10s ramp-up, 300s duration
+- **Total Duration**: ~11 minutes (5min + 1min + 5min)
+- **Purpose**: Test system behavior under sudden load spikes and recovery
+
+### Thread Group Properties
+- **User Count**: `ThreadGroup.num_threads` - number of concurrent users
+- **Ramp-up**: `ThreadGroup.ramp_time` - time to gradually start all users
+- **Delay**: `ThreadGroup.delay` - initial delay before starting (usually 0)
+- **Error Handling**: `ThreadGroup.on_sample_error=continue` - continue on errors
+- **User Persistence**: `ThreadGroup.same_user_on_next_iteration=true` - reuse users
+- **Scheduler**: `ThreadGroup.scheduler=true` - enable duration-based execution
+- **Duration**: `ThreadGroup.duration=[seconds]` - test duration in seconds
+
+## Standard JMX File Structure Pattern
+
+### Test Plan Level Components
+1. **User Defined Variables**: Set `testType` parameter for test-specific customization
+2. **Payload Generation**: JSR223PreProcessor for dynamic data generation
+3. **Shared Authentication**: JSR223PreProcessor for token management
+4. **Think Time**: UniformRandomTimer for realistic user behavior
+
+### Implementation Pattern
+```xml
+<TestPlan>
+  <elementProp name="TestPlan.user_defined_variables" elementType="Arguments">
+    <collectionProp name="Arguments.arguments">
+      <elementProp name="testType" elementType="Argument">
+        <stringProp name="Argument.name">testType</stringProp>
+        <stringProp name="Argument.value">Baseline</stringProp>
+      </elementProp>
+    </collectionProp>
+  </elementProp>
+  <hashTree>
+    <!-- Payload Generation -->
+    <JSR223PreProcessor testname="Generate Create Waste Movement Payload">
+      <stringProp name="filename">scripts/create_waste_movement_payload.groovy</stringProp>
+    </JSR223PreProcessor>
+    
+    <!-- Shared Authentication -->
+    <JSR223PreProcessor testname="Get Access Token">
+      <stringProp name="filename">scripts/get_accessToken.groovy</stringProp>
+    </JSR223PreProcessor>
+    
+    <!-- Thread Groups -->
+    <ThreadGroup>
+      <!-- Test logic here -->
+    </ThreadGroup>
+    
+    <!-- Think Time Timer -->
+    <UniformRandomTimer testname="Think Time">
+      <stringProp name="ConstantTimer.delay">500</stringProp>
+      <stringProp name="RandomTimer.range">1000</stringProp>
+    </UniformRandomTimer>
+  </hashTree>
+</TestPlan>
+```
+
+### Benefits of Standard Pattern
+- **Single Authentication**: Authenticate once, reuse across all threads
+- **Consistent Data**: Generate payloads once, use across all users
+- **Performance**: Avoid repeated setup overhead
+- **Maintainability**: Centralized data preparation logic
+- **Realistic Behavior**: Think time simulation for all tests
+
+## Standard JMX File Components
+
+### Required Components for All JMX Files
+1. **Test Plan Level**:
+   - User Defined Variables with `testType` parameter
+   - JSR223PreProcessor for payload generation
+   - JSR223PreProcessor for shared authentication
+   - UniformRandomTimer for think time (500ms base + 1000ms range)
+
+2. **Thread Group Level**:
+   - HTTP Samplers with HTTP Arguments configuration
+   - HeaderManager for Content-Type and Authorization
+   - ResponseAssertion for success validation
+   - DurationAssertion for response time thresholds
+   - JSONPostProcessor for data extraction (when needed)
+
+3. **HTTP Sampler Configuration**:
+   - Use `${__P(environment)}` for domain configuration
+   - Set `postBodyRaw=false` for JSON payloads
+   - Use HTTP Arguments with empty name for request body
+   - Set `always_encode=false` and `use_equals=false`
+
+4. **Response Time Monitoring**:
+   - DurationAssertion for technical failure detection
+   - APDEX scoring for user experience metrics
+   - Aligned thresholds: DurationAssertion > APDEX zones
+
+### ❌ EXCLUDE from .jmx files:
+1. **Configuration Data**
+   - Hardcoded URLs, credentials, or environment-specific values
+   - File paths and output locations
+   - Result collection settings
+
+2. **Result Collection Settings**
+   - ResultCollector configurations
+   - Save service properties (response_data, samplerData, etc.)
+   - Output file specifications
+
+3. **Environment-Specific Values**
+   - Base URLs, domains, ports
+   - Client IDs, secrets, API keys
+   - Test data and payloads (use external files)
+
+4. **Reporting Configuration**
+   - HTML report settings
+   - CSV/XML output formats
+   - Logging levels and verbosity
+
+## Implementation Guidelines
+- **Properties**: Use `${__P(propertyName)}` for all configurable values
+- **External Scripts**: Reference Groovy files with `filename` property
+- **External Data**: Use `${__FileToString()}` for payloads and test data
+- **Command Line**: Handle all configuration via script parameters
+- **Separation**: Keep business logic in .jmx, configuration in scripts
+
+## HTTP Request Configuration for Complex JSON
+
+### Standard HTTP Sampler Pattern
+```xml
+<HTTPSamplerProxy testname="Create Waste Movement">
+  <stringProp name="HTTPSampler.domain">waste-movement-external-api.api.${__P(environment)}.cdp-int.defra.cloud</stringProp>
+  <stringProp name="HTTPSampler.protocol">https</stringProp>
+  <stringProp name="HTTPSampler.path">/movements/receive</stringProp>
+  <stringProp name="HTTPSampler.method">POST</stringProp>
+  <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+  <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+    <collectionProp name="Arguments.arguments">
+      <elementProp name="" elementType="HTTPArgument">
+        <boolProp name="HTTPArgument.always_encode">false</boolProp>
+        <boolProp name="HTTPArgument.use_equals">false</boolProp>
+        <stringProp name="Argument.value">${postPayload}</stringProp>
+      </elementProp>
+    </collectionProp>
+  </elementProp>
+</HTTPSamplerProxy>
+```
+
+### Key Configuration Rules
+- **Use HTTP Arguments**: Set `postBodyRaw=false` and use HTTP Arguments for complex JSON
+- **Variable Substitution**: Use `${postPayload}` for POST/create operations and `${putPayload}` for PUT/update operations
+- **Avoid postBodyRaw**: Don't use `postBodyRaw=true` with complex JSON variable substitution
+- **Empty Argument Name**: Use empty argument name to make value become entire request body
+- **No Encoding**: Set `always_encode=false` and `use_equals=false` for JSON content
+- **Headers**: Use HeaderManager for Content-Type and Authorization headers
+- **Authorization**: Use `${__P(global_access_token)}` for shared authentication token
+
+## Payload Management
+- Use JSR223PreProcessor with external Groovy scripts for dynamic payload generation
+- Use HTTP Arguments (not postBodyRaw) for complex JSON payloads with variable substitution
+- Set `testType` parameter in User Defined Variables section
+- Use `${postPayload}` for POST/create operations and `${putPayload}` for PUT/update operations
+- Avoid embedding JSON directly in JMX files
+- Use JMeter variables for dynamic data generation
+- Generate payloads using dedicated Groovy scripts: `create_waste_movement_payload.groovy` and `update_waste_movement_payload.groovy`
+
+## Think Time Configuration
+- Use UniformRandomTimer for realistic user behavior simulation
+- **Delay**: 500ms base delay
+- **Range**: 1000ms random range (500-1500ms total)
+- **Purpose**: Simulate user thinking time between requests
+- **Placement**: At Test Plan level to apply to all ThreadGroups
+
+## DurationAssertion Configuration
+
+### Standard DurationAssertion Pattern
+```xml
+<DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Response Time Threshold" enabled="true">
+  <stringProp name="DurationAssertion.duration">2000</stringProp>
+</DurationAssertion>
+```
+
+### Threshold Guidelines
+- **Baseline Tests**: 2 seconds (catches clearly broken requests)
+- **Load Tests**: 3 seconds (allows for some load degradation)
+- **Stress Tests**: 5 seconds (allows for significant stress impact)
+- **Spike Tests**: 8 seconds (allows for dramatic load spikes)
+
+### Alignment with APDEX
+- **APDEX Zones**: Satisfied (≤500ms), Tolerating (500ms-1.5s), Frustrated (>1.5s)
+- **DurationAssertion**: Higher thresholds to catch only catastrophic failures
+- **Gap**: 0.5s-6.5s buffer allows user frustration before test failure
+- **Result**: Layered monitoring for both user experience and technical performance
+
+## Naming Conventions
+
+### Test Plan Names
+- **Single Operation**: `"[Operation] Waste Movement - [Test Type] Test"`
+- **Multi-Step Workflow**: `"[Step 1] and [Step 2] Waste Movement - [Test Type] Test"`
+- **Examples**: 
+  - `"Create Waste Movement - Baseline Test"`
+  - `"Create and Update Waste Movement - Baseline Test"`
+  - `"Create Waste Movement - Spike Test"` (NOT "Create and Update" for single operation)
+
+### ThreadGroup Names
+- **Single Operation**: `"[Operation] Waste Movement"`
+- **Multi-Step Workflow**: `"[Step 1] and [Step 2] Waste Movement"`
+- **Spike Test Phases**: `"Spike Phase [X] - [Description]"`
+- **Examples**:
+  - `"Create Waste Movement"`
+  - `"Create and Update Waste Movement"`
+  - `"Spike Phase 1 - Low Load"`
+  - `"Spike Phase 2 - High Load"`
+  - `"Spike Phase 3 - Recovery"`
+- **Avoid**: Static user counts (e.g., "1 User") - use configuration properties instead
+
+### HTTP Sampler Names
+- **Clear Operation**: `"[Operation] Waste Movement"`
+- **Examples**: `"Create Waste Movement"`, `"Update Waste Movement"`
+
+### JSR223PreProcessor Names
+- **Authentication**: `"Get Access Token"`
+- **Payload Generation**: `"Generate [Operation] Waste Movement Payload"`
+- **Examples**: 
+  - `"Generate Create Waste Movement Payload"`
+  - `"Generate Update Waste Movement Payload"`
+
+### Response Assertion Names
+- **Specific Validation**: `"Verify [Operation] Response Success"`
+- **Examples**: 
+  - `"Verify Create Response Success"`
+  - `"Verify Update Response Success"`
+
+### PostProcessor Names
+- **Data Extraction**: `"Extract [Data Type]"`
+- **Examples**: `"Extract Global Movement ID"`
+
+### Naming Principles
+- **Descriptive**: Names should clearly describe what the component does
+- **Consistent**: Use consistent patterns across all test files
+- **Workflow-Aware**: For multi-step tests, names should reflect the complete workflow
+- **No Static Values**: Avoid hardcoded user counts or other configuration values
+- **Operation-Specific**: Test plan names should match the actual operations being performed
+
+## Goal
+Create portable, maintainable test plans that focus purely on the test flow and business logic, with all configuration externalized to command-line scripts and property files.

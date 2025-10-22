@@ -1,0 +1,43 @@
+---
+description: CDP Platform Integration Rules
+globs:
+alwaysApply: true
+---
+
+# CDP Platform Integration Rules
+
+## CDP-Specific Considerations
+- This repository is designed for CDP Platform execution
+- Tests run as Docker containers in ECS tasks
+- Results are published to CDP Portal
+- Platform handles infrastructure provisioning automatically
+
+## Environment Configuration
+- Use `${__P(env)}` for environment-specific URLs
+- Support multiple environments: dev, test, perf-test, prod
+- Configure base URLs for different environments
+- Use CDP-specific environment variables
+
+## Docker Integration
+- Tests run in Docker containers
+- Include proper Dockerfile and entrypoint.sh
+- Ensure payload files are accessible in container
+- Configure proper working directory in container
+
+## Result Reporting
+- Results are automatically published to CDP Portal
+- Use CDP-compatible result formats
+- Include proper test metadata and labels
+- Ensure results are accessible for analysis
+
+## Local Testing
+- Support LocalStack for local development
+- Include local testing instructions
+- Provide Docker commands for local execution
+- Support both local and CDP execution modes
+
+## Platform Limitations
+- Don't test CDP platform performance (handled by platform)
+- Focus on service performance, not infrastructure
+- Use CDP-provided monitoring and logging
+- Follow CDP best practices for test execution

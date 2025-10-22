@@ -1,0 +1,38 @@
+---
+description: Documentation Standards
+globs:
+alwaysApply: true
+---
+
+# Documentation Standards
+
+## Required Documentation
+- `README.md` - Repository overview and setup instructions
+- `TEST_ORGANIZATION.md` - Test structure and usage guide
+- `PAYLOAD_STRUCTURE.md` - Payload file documentation
+- `.cursor/rules/` - LLM interaction rules
+
+## Documentation Updates
+- Update documentation when adding new tests
+- Keep documentation in sync with actual test structure
+- Include clear examples and usage instructions
+- Document any changes to test organization or payload structure
+
+## Code Comments
+- Include meaningful comments in JMX files
+- Document test purpose and configuration
+- Explain any complex test logic or setup
+- Use clear, descriptive test names and descriptions
+
+## File Naming
+- Use descriptive names for all files
+- Follow consistent naming conventions
+- Use kebab-case for file names
+- Include version or date when appropriate
+
+## README Content
+- Repository purpose and scope
+- Setup and installation instructions
+- Running tests locally and in CDP
+- Test organization overview
+- Contributing guidelines

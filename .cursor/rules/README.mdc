@@ -1,0 +1,56 @@
+---
+description: Cursor Rules for Digital Waste Tracking Performance Tests
+globs:
+alwaysApply: true
+---
+
+# Cursor Rules for Digital Waste Tracking Performance Tests
+
+This directory contains comprehensive rules for LLMs working on this performance testing repository. These rules ensure consistent, high-quality interactions and maintain the repository's focus on performance testing.
+
+## Rule Files Overview
+
+### Core Testing Rules
+- **`performance-testing.mdc`** - Core principles and focus areas for performance testing
+- **`test-intensity.mdc`** - Guidelines for load, stress, and spike testing
+- **`jmx-structure.mdc`** - Standards for JMX file organization and structure
+- **`spike-testing.mdc`** - Detailed patterns and configuration for spike tests
+
+### Technical Rules
+- **`payload-management.mdc`** - Rules for managing shared JSON payload files
+- **`environment-management.mdc`** - Environment variable configuration and security
+- **`cdp-integration.mdc`** - CDP Platform specific considerations and integration
+- **`shared-authentication.mdc`** - Shared authentication patterns and implementation
+- **`documentation.mdc`** - Documentation standards and requirements
+
+### Workflow Rules
+- **`development-workflow.mdc`** - Guidelines for adding, modifying, and maintaining tests
+- **`llm-interaction.mdc`** - Specific rules for LLM interactions with this repository
+
+## Key Principles
+
+1. **Performance Focus**: This repository is for performance testing only, not functional testing
+2. **Organization**: Tests are organized by intensity level (load/stress/spike)
+3. **Reusability**: Use shared payload files instead of embedded JSON
+4. **CDP Integration**: Designed for CDP Platform execution
+5. **Documentation**: Maintain comprehensive documentation
+
+## Quick Reference
+
+- **Test Organization**: `scenarios/create-waste-movement/successfully/`, `scenarios/update-waste-movement/successfully/`
+- **Payload Scripts**: `scripts/create_waste_movement_payload.groovy`, `scripts/update_waste_movement_payload.groovy`
+- **Authentication**: `scripts/get_accessToken.groovy` (shared across all tests)
+- **Test Execution**: `./entrypoint.sh` (uses `env.sh` for configuration)
+- **Key Documentation**: `TEST_ORGANIZATION.md`, `PAYLOAD_STRUCTURE.md`
+- **Focus Areas**: Load testing (10-50 users), Stress testing (25-50+ users), Spike testing (3-phase: 5→30→5 users)
+
+## Usage
+
+When working on this repository, LLMs should:
+1. Read the relevant rule files before making changes
+2. Follow the established patterns and conventions
+3. Maintain the performance testing focus
+4. Update documentation when making changes
+5. Test changes locally before suggesting them
+
+These rules ensure consistent, high-quality contributions to the performance testing suite.
