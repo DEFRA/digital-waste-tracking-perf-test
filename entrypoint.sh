@@ -38,7 +38,8 @@ REPO_LOCATION=$(cd "$(dirname "$0")" && pwd)
 JM_SCENARIOS=${REPO_LOCATION}/scenarios
 
 JM_LOG_FOLDER=${REPO_LOCATION}/logs
-JM_LOG_FILE=${JM_LOG_FOLDER}/jmeter
+JM_LOG_TEST=${JM_LOG_FOLDER}/jmeter-test
+JM_LOG_REPORT=${JM_LOG_FOLDER}/jmeter-report
 
 JM_RESULTS_FOLDER=${REPO_LOCATION}/results
 JM_JTL_FILE=${JM_RESULTS_FOLDER}/results.jtl
@@ -83,7 +84,7 @@ fi
 
 echo "Using JM_SCENARIOS: $JM_SCENARIOS"
 echo "Using JM_REPORT_FOLDER: $JM_REPORT_FOLDER"
-echo "Using JM_LOG_FILE: $JM_LOG_FILE"
+echo "Using JM_LOG_TEST: $JM_LOG_TEST"
 echo "Using JM_JTL_FILE: $JM_JTL_FILE"
 echo "Using CI: $CI"
 echo "Using ENVIRONMENT: $ENVIRONMENT"
@@ -93,7 +94,7 @@ echo "Using ENVIRONMENT: $ENVIRONMENT"
 test_exit_code=0
 for jmx_file in $jmx_files; do
   echo "\n\nRunning: $jmx_file\n\n"
-  jmeter -n -t "$jmx_file" -l "${JM_JTL_FILE}" -j ${JM_LOG_FILE} \
+  jmeter -n -t "$jmx_file" -l "${JM_JTL_FILE}" -j ${JM_LOG_TEST} \
     -Jenvironment=${ENVIRONMENT} \
     -JorganisationApiId=${ORGANISATION_API_ID} \
     -JclientId=${COGNITO_CLIENT_ID} \
@@ -110,7 +111,7 @@ done
 
 # Generate report from combined results
 echo "\n\nGenerating consolidated report..."
-jmeter -g ${JM_JTL_FILE} -e -o ${JM_REPORT_FOLDER} -j ${JM_LOG_FILE} 
+jmeter -g ${JM_JTL_FILE} -e -o ${JM_REPORT_FOLDER} -j ${JM_LOG_REPORT} 
 
 if [ "$CI" = "true" ]; then
   # Publish the results into S3 so they can be displayed in the CDP Portal
@@ -118,7 +119,8 @@ if [ "$CI" = "true" ]; then
     # Copy the JTL report file and the generated report files to the S3 bucket
     if [ -f "$JM_REPORT_FOLDER/index.html" ]; then
         aws --endpoint-url=$S3_ENDPOINT s3 cp "$JM_JTL_FILE" "$RESULTS_OUTPUT_S3_PATH/$(basename "$JM_JTL_FILE")"
-        aws --endpoint-url=$S3_ENDPOINT s3 cp "$JM_LOG_FILE" "$RESULTS_OUTPUT_S3_PATH/$(basename "$JM_LOG_FILE")"
+        aws --endpoint-url=$S3_ENDPOINT s3 cp "$JM_LOG_TEST" "$RESULTS_OUTPUT_S3_PATH/$(basename "$JM_LOG_TEST")"
+        aws --endpoint-url=$S3_ENDPOINT s3 cp "$JM_LOG_REPORT" "$RESULTS_OUTPUT_S3_PATH/$(basename "$JM_LOG_REPORT")"
         aws --endpoint-url=$S3_ENDPOINT s3 cp "$JM_REPORT_FOLDER" "$RESULTS_OUTPUT_S3_PATH" --recursive
         if [ $? -eq 0 ]; then
           echo "JTL report file and test results published to $RESULTS_OUTPUT_S3_PATH"
