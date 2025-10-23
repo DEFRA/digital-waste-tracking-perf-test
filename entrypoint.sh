@@ -8,16 +8,23 @@ else
 fi
 
 # Fail the script if certain environment variables are not set
-required_variables=(ENVIRONMENT TEST_SCENARIO CI COGNITO_CLIENT_ID COGNITO_CLIENT_SECRET COGNITO_OAUTH_BASE_URL ORGANISATION_API_ID)
-for variable in "${required_variables[@]}"; do
-  if [ -z "${!variable}" ]; then
-    echo "Error: ${variable} is not set"
+check_variable() {
+  if [ -z "$1" ]; then
+    echo "Error: $2 is not set"
     exit 1
   fi
-done
+}
+
+check_variable "$ENVIRONMENT" "ENVIRONMENT"
+check_variable "$TEST_SCENARIO" "TEST_SCENARIO"
+check_variable "$CI" "CI"
+check_variable "$COGNITO_CLIENT_ID" "COGNITO_CLIENT_ID"
+check_variable "$COGNITO_CLIENT_SECRET" "COGNITO_CLIENT_SECRET"
+check_variable "$COGNITO_OAUTH_BASE_URL" "COGNITO_OAUTH_BASE_URL"
+check_variable "$ORGANISATION_API_ID" "ORGANISATION_API_ID"
 
 # Log the run_id and environment if CI is true
-if [ $CI == "true" ]; then
+if [ "$CI" = "true" ]; then
   echo "\n\nrun_id: $RUN_ID in $ENVIRONMENT"
 fi
 
@@ -25,7 +32,7 @@ fi
 # Get the current date and time
 NOW=$(date +"%Y%m%d-%H%M%S")
 
-REPO_LOCATION=$(dirname $(readlink -f $0))
+REPO_LOCATION=$(dirname "$0")
 
 # Define the directories for the test results
 JM_SCENARIOS=${REPO_LOCATION}/scenarios
@@ -44,10 +51,14 @@ for fileorFolder in ${JM_REPORTS} ${JM_LOGS} ${JM_RESULTS}; do
 done
 
 # Build list of JMX files to run
-if [ ${TEST_SCENARIO} == "all" ]; then
+if [ "${TEST_SCENARIO}" = "all" ]; then
   echo "\n\nRunning all scenarios"
   # Build list of all JMX files in scenarios folder (including subdirectories)
-  jmx_files=$(find scenarios -name "*.jmx" -type f)
+  jmx_files=$(find scenarios -name "*.jmx" -type f 2>/dev/null || echo "")
+  if [ -z "$jmx_files" ]; then
+    echo "No JMX files found in scenarios directory"
+    exit 1
+  fi
 else
   echo "\n\nRunning scenario: ${TEST_SCENARIO}"
   SCENARIOFILE=${JM_SCENARIOS}/${TEST_SCENARIO}
@@ -84,12 +95,12 @@ done
 echo "\n\nGenerating consolidated report..."
 jmeter -g ${REPORTFILE} -e -o ${JM_REPORTS} -j ${LOGFILE} 
 
-if [ $CI == "true" ]; then
+if [ "$CI" = "true" ]; then
   # Publish the results into S3 so they can be displayed in the CDP Portal
   if [ -n "$RESULTS_OUTPUT_S3_PATH" ]; then
     # Copy the CSV report file and the generated report files to the S3 bucket
     if [ -f "$JM_REPORTS/index.html" ]; then
-        aws --endpoint-url=$S3_ENDPOINT s3 cp "$REPORTFILE" "$RESULTS_OUTPUT_S3_PATH/$(basename $REPORTFILE)"
+        aws --endpoint-url=$S3_ENDPOINT s3 cp "$REPORTFILE" "$RESULTS_OUTPUT_S3_PATH/$(basename "$REPORTFILE")"
         aws --endpoint-url=$S3_ENDPOINT s3 cp "$JM_REPORTS" "$RESULTS_OUTPUT_S3_PATH" --recursive
         if [ $? -eq 0 ]; then
           echo "CSV report file and test results published to $RESULTS_OUTPUT_S3_PATH"
@@ -102,7 +113,7 @@ if [ $CI == "true" ]; then
     echo "RESULTS_OUTPUT_S3_PATH is not set"
     exit 1
   fi
-elif [ $CI == "false" ]; then
+elif [ "$CI" = "false" ]; then
   echo "All tests completed"
   if command -v open >/dev/null 2>&1; then
     echo "Opening report in browser..."
