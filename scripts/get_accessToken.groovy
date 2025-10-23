@@ -38,8 +38,8 @@ if (props.get("global_access_token") == null || now > accessTokenExpiresAt) {
     HttpClient.Builder clientBuilder = HttpClient.newBuilder()
     
     // Configure proxy if provided
-    String proxyHost = props.get("httpProxyHost")
-    String proxyPort = props.get("httpProxyPort")
+    String proxyHost = props.get("http.proxyHost")
+    String proxyPort = props.get("http.proxyPort")
     if (proxyHost && proxyPort && !proxyHost.isEmpty() && !proxyPort.isEmpty()) {
         clientBuilder.proxy(new java.net.Proxy(java.net.Proxy.Type.HTTP, new java.net.InetSocketAddress(proxyHost, Integer.parseInt(proxyPort))))
         log.info("Using HTTP proxy: ${proxyHost}:${proxyPort}")
