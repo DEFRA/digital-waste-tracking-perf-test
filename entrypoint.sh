@@ -38,7 +38,7 @@ REPO_LOCATION=$(cd "$(dirname "$0")" && pwd)
 JM_SCENARIOS=${REPO_LOCATION}/scenarios
 
 JM_LOG_FOLDER=${REPO_LOCATION}/logs
-JM_LOG_FILE=${JM_LOG_FOLDER}/jmeter.log
+JM_LOG_FILE=${JM_LOG_FOLDER}/jmeter
 
 JM_RESULTS_FOLDER=${REPO_LOCATION}/results
 JM_JTL_FILE=${JM_RESULTS_FOLDER}/results.jtl
