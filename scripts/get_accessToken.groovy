@@ -73,6 +73,8 @@ if (props.get("global_access_token") == null || now > accessTokenExpiresAt) {
         }
     } else {
         throw new Exception("Authentication failed with status: " + response.statusCode() + ", Response: " + response.body())
+        // temp debugging line
+        println("Authentication failed with status: " + response.statusCode() + ", Response: " + response.body())
     }
 } else {
     log.info("Reusing existing global access token")
