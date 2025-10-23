@@ -68,8 +68,6 @@ else
   jmx_files="${SCENARIOFILE}"
 fi
 
-HTTP_PROXY=proxy.example.com:8080
-
 # Parse HTTP_PROXY if provided
 if [ -n "$HTTP_PROXY" ]; then
   # Normalize HTTP_PROXY to include scheme if missing
