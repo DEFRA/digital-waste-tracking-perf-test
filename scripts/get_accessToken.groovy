@@ -34,8 +34,18 @@ if (props.get("global_access_token") == null || now > accessTokenExpiresAt) {
     String requestBody = "grant_type=client_credentials"
     String authUrl = "${authBaseUrl}/oauth2/token"
 
-    // Create HTTP client and request
-    HttpClient client = HttpClient.newBuilder().build()
+    // Create HTTP client with optional proxy configuration
+    HttpClient.Builder clientBuilder = HttpClient.newBuilder()
+    
+    // Configure proxy if provided
+    String proxyHost = props.get("httpProxyHost")
+    String proxyPort = props.get("httpProxyPort")
+    if (proxyHost && proxyPort && !proxyHost.isEmpty() && !proxyPort.isEmpty()) {
+        clientBuilder.proxy(new java.net.Proxy(java.net.Proxy.Type.HTTP, new java.net.InetSocketAddress(proxyHost, Integer.parseInt(proxyPort))))
+        log.info("Using HTTP proxy: ${proxyHost}:${proxyPort}")
+    }
+    
+    HttpClient client = clientBuilder.build()
     HttpRequest request = HttpRequest.newBuilder()
         .uri(URI.create(authUrl))
         .header("Content-Type", "application/x-www-form-urlencoded")

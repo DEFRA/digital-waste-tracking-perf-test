@@ -70,22 +70,18 @@ fi
 
 # Parse HTTP_PROXY if provided
 if [ -n "$HTTP_PROXY" ]; then
-  # Normalize HTTP_PROXY to include scheme if missing
-  if [ "${HTTP_PROXY#http}" = "$HTTP_PROXY" ]; then
-    HTTP_PROXY="http://$HTTP_PROXY"
-  fi
-
   # Parse host and port
-  HTTP_PROXY_HOST=$(echo "$HTTP_PROXY" | cut -d/ -f3 | cut -d: -f1)
-  HTTP_PROXY_PORT=$(echo "$HTTP_PROXY" | cut -d: -f3 | cut -d/ -f1)
-  JM_COMMAND_LINE_PROXY_OPTION="-H${HTTP_PROXY_HOST} -P${HTTP_PROXY_PORT}"
-  echo "Using HTTP proxy: $HTTP_PROXY_HOST:$HTTP_PROXY_PORT"
+  HTTP_PROXY_HOST=$(echo "$HTTP_PROXY" | cut -d: -f1)
+  HTTP_PROXY_PORT=$(echo "$HTTP_PROXY" | cut -d: -f2)
+  JM_COMMAND_LINE_PROXY_OPTION="-H${HTTP_PROXY_HOST} -P${HTTP_PROXY_PORT} -Jhttp.proxyHost=${HTTP_PROXY_HOST} -Jhttp.proxyPort=${HTTP_PROXY_PORT}"
+  echo "Using HTTP_PROXY_HOST: $HTTP_PROXY_HOST"
+  echo "Using HTTP_PROXY_PORT: $HTTP_PROXY_PORT"
 else
   echo "No HTTP proxy configured"
   JM_COMMAND_LINE_PROXY_OPTION=""
 fi
 
-echo "\n\nUsing JM_SCENARIOS: $JM_SCENARIOS"
+echo "Using JM_SCENARIOS: $JM_SCENARIOS"
 echo "Using JM_REPORT_FOLDER: $JM_REPORT_FOLDER"
 echo "Using JM_LOG_FILE: $JM_LOG_FILE"
 echo "Using JM_JTL_FILE: $JM_JTL_FILE"
