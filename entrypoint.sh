@@ -118,6 +118,7 @@ if [ "$CI" = "true" ]; then
     # Copy the JTL report file and the generated report files to the S3 bucket
     if [ -f "$JM_REPORT_FOLDER/index.html" ]; then
         aws --endpoint-url=$S3_ENDPOINT s3 cp "$JM_JTL_FILE" "$RESULTS_OUTPUT_S3_PATH/$(basename "$JM_JTL_FILE")"
+        aws --endpoint-url=$S3_ENDPOINT s3 cp "$JM_LOG_FILE" "$RESULTS_OUTPUT_S3_PATH/$(basename "$JM_LOG_FILE")"
         aws --endpoint-url=$S3_ENDPOINT s3 cp "$JM_REPORT_FOLDER" "$RESULTS_OUTPUT_S3_PATH" --recursive
         if [ $? -eq 0 ]; then
           echo "JTL report file and test results published to $RESULTS_OUTPUT_S3_PATH"
