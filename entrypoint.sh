@@ -70,9 +70,9 @@ fi
 
 # Parse HTTP_PROXY if provided
 if [ -n "$HTTP_PROXY" ]; then
-  # Parse host and port
-  HTTP_PROXY_HOST=$(echo "$HTTP_PROXY" | cut -d: -f1)
-  HTTP_PROXY_PORT=$(echo "$HTTP_PROXY" | cut -d: -f2)
+  # Parse host and port (format: http://host:port)
+  HTTP_PROXY_HOST=$(echo "$HTTP_PROXY" | cut -d: -f2 | cut -d/ -f3)
+  HTTP_PROXY_PORT=$(echo "$HTTP_PROXY" | cut -d: -f3 | cut -d/ -f1)
   JM_COMMAND_LINE_PROXY_OPTION="-H${HTTP_PROXY_HOST} -P${HTTP_PROXY_PORT} -Jhttp.proxyHost=${HTTP_PROXY_HOST} -Jhttp.proxyPort=${HTTP_PROXY_PORT}"
   echo "Using HTTP_PROXY_HOST: $HTTP_PROXY_HOST"
   echo "Using HTTP_PROXY_PORT: $HTTP_PROXY_PORT"
