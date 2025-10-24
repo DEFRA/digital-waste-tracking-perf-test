@@ -1,14 +1,37 @@
 ---
-description: Test Intensity Guidelines
+description: Core Performance Testing Principles and Guidelines
 globs:
 alwaysApply: true
 ---
 
-# Test Intensity Guidelines
+# Core Performance Testing Principles and Guidelines
 
-## Baseline Tests (Functional Validation)
+## Purpose
+This repository is dedicated to **performance testing only**. It does NOT handle functional testing, business logic validation, or API contract testing.
 
-### Create Operations (Single Step)
+## Test Focus Areas
+- **Load Testing**: Normal expected load (10-50 users)
+- **Stress Testing**: Beyond normal capacity (25-50+ users)
+- **Spike Testing**: Sudden load bursts (5→50→5 users)
+
+**Note**: Soak testing (long-duration tests for memory leaks/resource exhaustion) is not supported due to CDP Platform's 2-hour maximum runtime limit.
+
+## What NOT to Test
+- Business logic correctness (handled by regression pack)
+- API contract validation (handled by regression pack)
+- Edge case handling (handled by regression pack)
+- Basic connectivity (handled by regression pack)
+
+## Test Organization
+- `scenarios/create-waste-movement/successfully/` - Create operation tests
+- `scenarios/update-waste-movement/successfully/` - Update operation tests (two-step workflow: create + update)
+- Each operation has: `baseline-test.jmx`, `load-test.jmx`, `spike-test.jmx`, `stress-test.jmx`
+
+## Test Intensity Guidelines
+
+### Baseline Tests (Functional Validation)
+
+#### Create Operations (Single Step)
 - **User Count**: 1 user
 - **Duration**: Single request
 - **Ramp-up**: 1 second
@@ -16,7 +39,7 @@ alwaysApply: true
 - **Response Time Threshold**: 2 seconds
 - **Purpose**: Functional validation and baseline metrics
 
-### Update Operations (Two-Step Workflow)
+#### Update Operations (Two-Step Workflow)
 - **User Count**: 1 user
 - **Duration**: Single request
 - **Ramp-up**: 1 second
@@ -24,9 +47,9 @@ alwaysApply: true
 - **Response Time Threshold**: 2 seconds
 - **Purpose**: Functional validation and baseline metrics
 
-## Load Tests (Normal Expected Load)
+### Load Tests (Normal Expected Load)
 
-### Create Operations (Single Step)
+#### Create Operations (Single Step)
 - **User Count**: 30 users
 - **Duration**: 30 minutes (1800s)
 - **Ramp-up**: 3 minutes (180s)
@@ -34,7 +57,7 @@ alwaysApply: true
 - **Response Time Threshold**: 3 seconds
 - **Purpose**: Test performance under normal expected load for simple operations
 
-### Update Operations (Two-Step Workflow)
+#### Update Operations (Two-Step Workflow)
 - **User Count**: 30 users
 - **Duration**: 30 minutes (1800s)
 - **Ramp-up**: 3 minutes (180s)
@@ -42,9 +65,9 @@ alwaysApply: true
 - **Response Time Threshold**: 3 seconds
 - **Purpose**: Test performance under normal expected load for complex workflows
 
-## Stress Tests (Beyond Normal Capacity)
+### Stress Tests (Beyond Normal Capacity)
 
-### Create Operations (Single Step)
+#### Create Operations (Single Step)
 - **User Count**: 50 users
 - **Duration**: 30 minutes (1800s)
 - **Ramp-up**: 5 minutes (300s)
@@ -52,7 +75,7 @@ alwaysApply: true
 - **Response Time Threshold**: 5 seconds
 - **Purpose**: Find breaking points for simple operations
 
-### Update Operations (Two-Step Workflow)
+#### Update Operations (Two-Step Workflow)
 - **User Count**: 50 users
 - **Duration**: 30 minutes (1800s)
 - **Ramp-up**: 5 minutes (300s)
@@ -60,9 +83,9 @@ alwaysApply: true
 - **Response Time Threshold**: 5 seconds
 - **Purpose**: Find breaking points for complex workflows
 
-## Spike Tests (Sudden Load Bursts)
+### Spike Tests (Sudden Load Bursts)
 
-### Both Create and Update Operations
+#### Both Create and Update Operations
 - **Phase 1**: 5 users, 30s ramp-up, 5min duration (baseline)
 - **Phase 2**: 50 users, 5s ramp-up, 1min duration (dramatic spike)
 - **Phase 3**: 5 users, 10s ramp-up, 5min duration (recovery)
@@ -98,3 +121,10 @@ alwaysApply: true
 - Monitor resource utilization during tests
 - Use APDEX scores for business reporting and user experience insights
 - Use DurationAssertion for technical failure detection and CI/CD gates
+
+## Key Principles
+1. Focus on performance metrics: response times, throughput, resource utilization
+2. Test under various load conditions, not business scenarios
+3. Use realistic but performance-focused test data
+4. Measure and report performance characteristics
+5. Avoid duplicating functional test coverage

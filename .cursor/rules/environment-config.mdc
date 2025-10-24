@@ -1,10 +1,10 @@
 ---
-description: Environment Management Rules
+description: Environment Configuration and Management Rules
 globs:
 alwaysApply: true
 ---
 
-# Environment Management Rules
+# Environment Configuration and Management Rules
 
 ## Environment Variable Strategy
 This repository uses a **command-line properties approach** for JMeter configuration, which provides maximum flexibility and clear separation between configuration and business logic.
@@ -72,6 +72,30 @@ ENVIRONMENT=dev TEST_SCENARIO=create-waste-movement/successfully/baseline-test .
 # Scripts pass them as JMeter properties
 ./entrypoint.sh
 ```
+
+## Required Environment Variables
+- `ENVIRONMENT`: Target environment (dev, test, perf-test, prod)
+- `TEST_SCENARIO`: JMX file path or "all" for all tests
+- `CI`: "true" for CDP Platform, "false" for local development
+- `COGNITO_CLIENT_ID`: OAuth2 client ID
+- `COGNITO_CLIENT_SECRET`: OAuth2 client secret
+- `COGNITO_OAUTH_BASE_URL`: OAuth2 base URL
+- `ORGANISATION_API_ID`: Organization API ID
+
+## Test Execution Flow
+1. **Cleanup**: Removes previous test results from `reports/`, `logs/`, `results/` directories
+2. **Authentication**: Gets OAuth2 token using shared authentication script
+3. **Test Execution**: Runs JMX files with proper environment variables
+4. **Report Generation**: Creates HTML report from CSV results
+5. **Output**: Opens report in browser (local) or uploads to S3 (CI)
+
+## Directory Structure
+- `scenarios/`: JMX test files organized by operation and test type
+- `scripts/`: Groovy scripts for authentication and payload generation
+- `reports/`: Generated HTML reports (gitignored)
+- `logs/`: JMeter execution logs (gitignored)
+- `results/`: CSV result files (gitignored)
+- `temp/`: Temporary files generated during test execution (gitignored)
 
 ## Security Guidelines
 1. **Never commit** `env.sh` with real credentials

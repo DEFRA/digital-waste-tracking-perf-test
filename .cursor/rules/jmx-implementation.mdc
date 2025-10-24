@@ -1,10 +1,10 @@
 ---
-description: JMX File Structure Rules
+description: JMX File Structure, Patterns, and Implementation Guidelines
 globs:
 alwaysApply: true
 ---
 
-# JMX File Structure Rules
+# JMX File Structure, Patterns, and Implementation Guidelines
 
 ## File Organization
 - Organize JMX files by operation first, then test type
@@ -34,6 +34,27 @@ alwaysApply: true
    - Thread Groups and execution order
    - Loop controllers and iteration logic
    - Basic test plan configuration
+
+### ❌ EXCLUDE from .jmx files:
+1. **Configuration Data**
+   - Hardcoded URLs, credentials, or environment-specific values
+   - File paths and output locations
+   - Result collection settings
+
+2. **Result Collection Settings**
+   - ResultCollector configurations
+   - Save service properties (response_data, samplerData, etc.)
+   - Output file specifications
+
+3. **Environment-Specific Values**
+   - Base URLs, domains, ports
+   - Client IDs, secrets, API keys
+   - Test data and payloads (use external files)
+
+4. **Reporting Configuration**
+   - HTML report settings
+   - CSV/XML output formats
+   - Logging levels and verbosity
 
 ## Thread Group Configuration Patterns
 
@@ -117,6 +138,36 @@ alwaysApply: true
 - **Maintainability**: Centralized data preparation logic
 - **Realistic Behavior**: Think time simulation for all tests
 
+## HTTP Request Configuration
+
+### Standard HTTP Sampler Pattern
+```xml
+<HTTPSamplerProxy testname="Create Waste Movement">
+  <stringProp name="HTTPSampler.domain">waste-movement-external-api.api.${__P(environment)}.cdp-int.defra.cloud</stringProp>
+  <stringProp name="HTTPSampler.protocol">https</stringProp>
+  <stringProp name="HTTPSampler.path">/movements/receive</stringProp>
+  <stringProp name="HTTPSampler.method">POST</stringProp>
+  <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+  <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+    <collectionProp name="Arguments.arguments">
+      <elementProp name="" elementType="HTTPArgument">
+        <boolProp name="HTTPArgument.always_encode">false</boolProp>
+        <boolProp name="HTTPArgument.use_equals">false</boolProp>
+        <stringProp name="Argument.value">${postPayload}</stringProp>
+      </elementProp>
+    </collectionProp>
+  </elementProp>
+</HTTPSamplerProxy>
+```
+
+### Key Configuration Rules
+- **Use HTTP Arguments**: Set `postBodyRaw=false` and use HTTP Arguments for complex JSON
+- **Variable Substitution**: Use `${postPayload}` for POST/create operations and `${putPayload}` for PUT/update operations
+- **Empty Argument Name**: Use empty argument name to make value become entire request body
+- **No Encoding**: Set `always_encode=false` and `use_equals=false` for JSON content
+- **Headers**: Use HeaderManager for Content-Type and Authorization headers
+- **Authorization**: Use `${__P(global_access_token)}` for shared authentication token
+
 ## Standard JMX File Components
 
 ### Required Components for All JMX Files
@@ -144,80 +195,24 @@ alwaysApply: true
    - APDEX scoring for user experience metrics
    - Aligned thresholds: DurationAssertion > APDEX zones
 
-### ❌ EXCLUDE from .jmx files:
-1. **Configuration Data**
-   - Hardcoded URLs, credentials, or environment-specific values
-   - File paths and output locations
-   - Result collection settings
-
-2. **Result Collection Settings**
-   - ResultCollector configurations
-   - Save service properties (response_data, samplerData, etc.)
-   - Output file specifications
-
-3. **Environment-Specific Values**
-   - Base URLs, domains, ports
-   - Client IDs, secrets, API keys
-   - Test data and payloads (use external files)
-
-4. **Reporting Configuration**
-   - HTML report settings
-   - CSV/XML output formats
-   - Logging levels and verbosity
-
 ## Implementation Guidelines
-- **Properties**: Use `${__P(propertyName)}` for all configurable values
-- **External Scripts**: Reference Groovy files with `filename` property
-- **External Data**: Use `${__FileToString()}` for payloads and test data
-- **Command Line**: Handle all configuration via script parameters
-- **Separation**: Keep business logic in .jmx, configuration in scripts
 
-## HTTP Request Configuration for Complex JSON
+### Properties Usage
+- Use `${__P(propertyName)}` for all configurable values
+- Use `${__P(environment)}` for environment-specific URLs
+- Use `${__P(global_access_token)}` for shared authentication token
 
-### Standard HTTP Sampler Pattern
-```xml
-<HTTPSamplerProxy testname="Create Waste Movement">
-  <stringProp name="HTTPSampler.domain">waste-movement-external-api.api.${__P(environment)}.cdp-int.defra.cloud</stringProp>
-  <stringProp name="HTTPSampler.protocol">https</stringProp>
-  <stringProp name="HTTPSampler.path">/movements/receive</stringProp>
-  <stringProp name="HTTPSampler.method">POST</stringProp>
-  <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
-  <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
-    <collectionProp name="Arguments.arguments">
-      <elementProp name="" elementType="HTTPArgument">
-        <boolProp name="HTTPArgument.always_encode">false</boolProp>
-        <boolProp name="HTTPArgument.use_equals">false</boolProp>
-        <stringProp name="Argument.value">${postPayload}</stringProp>
-      </elementProp>
-    </collectionProp>
-  </elementProp>
-</HTTPSamplerProxy>
-```
+### External Scripts
+- Reference Groovy files with `filename` property
+- Use `scripts/get_accessToken.groovy` for authentication
+- Use `scripts/create_waste_movement_payload.groovy` for create operations
+- Use `scripts/update_waste_movement_payload.groovy` for update operations
 
-### Key Configuration Rules
-- **Use HTTP Arguments**: Set `postBodyRaw=false` and use HTTP Arguments for complex JSON
-- **Variable Substitution**: Use `${postPayload}` for POST/create operations and `${putPayload}` for PUT/update operations
-- **Avoid postBodyRaw**: Don't use `postBodyRaw=true` with complex JSON variable substitution
-- **Empty Argument Name**: Use empty argument name to make value become entire request body
-- **No Encoding**: Set `always_encode=false` and `use_equals=false` for JSON content
-- **Headers**: Use HeaderManager for Content-Type and Authorization headers
-- **Authorization**: Use `${__P(global_access_token)}` for shared authentication token
-
-## Payload Management
-- Use JSR223PreProcessor with external Groovy scripts for dynamic payload generation
-- Use HTTP Arguments (not postBodyRaw) for complex JSON payloads with variable substitution
-- Set `testType` parameter in User Defined Variables section
-- Use `${postPayload}` for POST/create operations and `${putPayload}` for PUT/update operations
-- Avoid embedding JSON directly in JMX files
-- Use JMeter variables for dynamic data generation
-- Generate payloads using dedicated Groovy scripts: `create_waste_movement_payload.groovy` and `update_waste_movement_payload.groovy`
-
-## Think Time Configuration
-- Use UniformRandomTimer for realistic user behavior simulation
-- **Delay**: 500ms base delay
-- **Range**: 1000ms random range (500-1500ms total)
-- **Purpose**: Simulate user thinking time between requests
-- **Placement**: At Test Plan level to apply to all ThreadGroups
+### Variable Usage
+- Use `${postPayload}` for POST/create operations
+- Use `${putPayload}` for PUT/update operations
+- Use `${testType}` for test-specific customization
+- Use `${globalMovementId}` for data extraction and updates
 
 ## DurationAssertion Configuration
 
@@ -289,6 +284,24 @@ alwaysApply: true
 - **Workflow-Aware**: For multi-step tests, names should reflect the complete workflow
 - **No Static Values**: Avoid hardcoded user counts or other configuration values
 - **Operation-Specific**: Test plan names should match the actual operations being performed
+
+## Best Practices
+
+### Do's
+- Always use shared authentication pattern
+- Use HTTP Arguments for JSON payloads with variable substitution
+- Include think time simulation for realistic behavior
+- Use descriptive names that explain functionality
+- Follow consistent naming patterns across all files
+- Use external Groovy scripts for dynamic data generation
+
+### Don'ts
+- Don't use postBodyRaw for complex JSON payloads
+- Don't hardcode authentication in individual JMX files
+- Don't embed JSON directly in JMX files
+- Don't use static values in names (user counts, etc.)
+- Don't skip think time simulation
+- Don't hardcode environment-specific values
 
 ## Goal
 Create portable, maintainable test plans that focus purely on the test flow and business logic, with all configuration externalized to command-line scripts and property files.

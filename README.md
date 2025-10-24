@@ -76,6 +76,10 @@ Test suites are built automatically by the [.github/workflows/publish.yml](.gith
 
 The CDP Platform runs test suites as ECS tasks, automatically provisioning infrastructure as required. Results are published to the CDP Portal.
 
+**⚠️ Important CDP Platform Limitation**: The CDP Platform has a **maximum runtime limit of 2 hours**. Test processes will be automatically killed if they exceed this limit. The current test pack duration is approximately 2 hours 22 minutes, so individual test runs should be executed rather than running the complete test suite in a single execution.
+
+**Soak Testing Limitation**: Due to the 2-hour runtime limit, soak testing (long-duration tests to identify memory leaks, resource exhaustion, or performance degradation over time) cannot be performed in the CDP CI environment. Soak testing would need to be conducted in local environments or alternative platforms that support longer test durations.
+
 ## Local Testing with LocalStack
 
 ### Build a new Docker image

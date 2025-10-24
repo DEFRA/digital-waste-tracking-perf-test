@@ -1,0 +1,211 @@
+---
+description: Rule Structure Documentation and Guidelines
+globs:
+alwaysApply: true
+---
+
+# Rule Structure Documentation and Guidelines
+
+## Overview
+This document explains the structure of the `.cursor/rules/` directory and provides guidelines for maintaining and extending the rule system.
+
+## Current Rule Structure
+
+### Core Rules (4 files)
+These files contain fundamental principles that apply across the entire repository:
+
+1. **`core-testing.mdc`** - Core performance testing principles, test intensity guidelines, and monitoring strategies
+2. **`jmx-implementation.mdc`** - JMX file structure, patterns, naming conventions, and implementation guidelines  
+3. **`environment-config.mdc`** - Environment variable management, configuration files, and security guidelines
+4. **`cdp-integration.mdc`** - CDP Platform integration, limitations, and execution strategies
+
+### Specialized Rules (5 files)
+These files contain specific technical areas with detailed implementation guidance:
+
+1. **`payload-management.mdc`** - Rules for managing shared JSON payload files and Groovy scripts
+2. **`shared-authentication.mdc`** - Shared authentication patterns and implementation
+3. **`spike-testing.mdc`** - Detailed patterns and configuration for spike tests
+4. **`workflow-guide.mdc`** - Development workflow, LLM interaction guidelines, and best practices
+5. **`documentation.mdc`** - Documentation standards and requirements
+
+### Meta Rules (2 files)
+These files provide structure and guidance for the rule system itself:
+
+1. **`README.mdc`** - Overview of all rules and quick reference
+2. **`rule-structure.mdc`** - This file, documenting the rule system structure
+
+## Design Principles
+
+### Single Source of Truth
+- Each concept is documented in exactly one primary location
+- Cross-references are minimal and point to the primary location
+- No duplication of content across files
+
+### Clear Separation of Concerns
+- **Core Rules**: Fundamental principles that apply everywhere
+- **Specialized Rules**: Specific technical areas with detailed guidance
+- **Meta Rules**: Structure and maintenance of the rule system itself
+
+### Hierarchical Organization
+- Core rules provide the foundation
+- Specialized rules build upon core principles
+- Meta rules govern the system itself
+
+## File Naming Conventions
+
+### Core Rules
+- Use descriptive names that indicate the fundamental nature
+- Examples: `core-testing.mdc`, `jmx-implementation.mdc`
+
+### Specialized Rules
+- Use kebab-case for multi-word names
+- Be specific about the domain covered
+- Examples: `payload-management.mdc`, `shared-authentication.mdc`
+
+### Meta Rules
+- Use clear, descriptive names
+- Examples: `README.mdc`, `rule-structure.mdc`
+
+## Content Guidelines
+
+### File Structure
+Each rule file should follow this structure:
+```markdown
+---
+description: Brief description of the file's purpose
+globs:
+alwaysApply: true
+---
+
+# File Title
+
+## Main Section 1
+Content...
+
+## Main Section 2
+Content...
+
+## Implementation Guidelines
+Specific guidance...
+
+## Best Practices
+Do's and don'ts...
+```
+
+### Content Principles
+1. **Focused Scope**: Each file should have a clear, single purpose
+2. **Comprehensive Coverage**: Cover the topic thoroughly within its scope
+3. **Practical Examples**: Include concrete examples where helpful
+4. **Clear Headings**: Use descriptive, hierarchical headings
+5. **Actionable Content**: Provide specific, actionable guidance
+
+## Adding New Rules
+
+### When to Add a New Rule File
+- The topic is substantial enough to warrant its own file (typically 100+ lines)
+- The topic is distinct from existing rule files
+- The topic will be referenced frequently
+- The topic has specialized implementation details
+
+### When to Add to Existing Files
+- The content fits naturally within an existing file's scope
+- The content is relatively small (typically <50 lines)
+- The content is closely related to existing content in the file
+
+### Process for Adding New Rules
+1. **Identify the Domain**: Determine if it's core functionality or specialized
+2. **Check for Duplication**: Ensure the concept isn't already covered
+3. **Choose the Right File**: 
+   - Core concepts → `core-testing.mdc` or `jmx-implementation.mdc`
+   - Specialized topics → Create new file or add to existing specialized file
+4. **Follow Naming Convention**: Use kebab-case for file names
+5. **Include Metadata**: Always include description and globs in frontmatter
+6. **Update README**: Add the new rule to the overview
+7. **Update This File**: Add the new rule to the structure documentation
+
+## Modifying Existing Rules
+
+### Process for Modifications
+1. **Identify Primary Location**: Find where the concept is primarily documented
+2. **Update Single Source**: Make changes in the primary location only
+3. **Check Dependencies**: Ensure changes don't break references in other files
+4. **Maintain Consistency**: Keep terminology and patterns consistent
+5. **Update Cross-References**: If moving content, update any references
+
+### Avoiding Duplication
+- Before adding content, search existing files for similar concepts
+- If similar content exists, enhance the existing content rather than duplicating
+- If content needs to be moved, update all references to the new location
+
+## Cross-Reference Guidelines
+
+### When to Use Cross-References
+- When content in one file builds upon content in another
+- When specialized rules reference core principles
+- When multiple files need to reference the same detailed information
+
+### How to Structure Cross-References
+- Use descriptive text that explains what the reader will find
+- Example: "See `jmx-implementation.mdc` for detailed JMX file patterns and configuration guidelines"
+- Avoid generic references like "See other file for details"
+
+### Minimizing Cross-References
+- Keep cross-references to a minimum
+- Prefer self-contained content when possible
+- Only reference when the content is substantial and clearly related
+
+## Maintenance Guidelines
+
+### Regular Review
+- Periodically review files for outdated information
+- Check for new duplications that may have been introduced
+- Ensure cross-references are still valid
+
+### Content Updates
+- Update rules when repository practices change
+- Keep examples current and relevant
+- Maintain consistency in terminology and formatting
+
+### File Organization
+- If a file becomes too large (>500 lines), consider splitting it
+- If multiple files become too small (<50 lines), consider merging them
+- Maintain the core/specialized/meta organization
+
+## Quality Assurance
+
+### Before Committing Changes
+1. **Check for Duplication**: Ensure no content is duplicated across files
+2. **Verify Cross-References**: Ensure all references are valid and helpful
+3. **Test Readability**: Ensure the content is clear and actionable
+4. **Update Documentation**: Update README.mdc and this file if needed
+
+### Content Quality Standards
+- **Clarity**: Content should be clear and unambiguous
+- **Completeness**: Cover the topic thoroughly within the file's scope
+- **Consistency**: Use consistent terminology and formatting
+- **Actionability**: Provide specific, actionable guidance
+- **Examples**: Include concrete examples where helpful
+
+## Troubleshooting Common Issues
+
+### Duplication Problems
+- **Symptom**: Same information appears in multiple files
+- **Solution**: Identify the primary location and remove duplicates
+- **Prevention**: Always search existing files before adding new content
+
+### Circular References
+- **Symptom**: Files reference each other in a circular manner
+- **Solution**: Restructure to eliminate circular dependencies
+- **Prevention**: Keep cross-references minimal and unidirectional
+
+### Outdated Information
+- **Symptom**: Rules don't match current repository practices
+- **Solution**: Update the primary location with current information
+- **Prevention**: Regular review and maintenance
+
+### Inconsistent Terminology
+- **Symptom**: Different terms used for the same concept
+- **Solution**: Standardize terminology across all files
+- **Prevention**: Maintain a glossary of key terms
+
+This rule structure ensures maintainable, clear, and comprehensive guidance for working with the performance testing repository.
