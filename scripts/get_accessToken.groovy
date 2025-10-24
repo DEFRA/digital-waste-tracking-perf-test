@@ -1,9 +1,10 @@
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
-import java.net.URI
+import org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy
+import org.apache.jmeter.protocol.http.sampler.HTTPSampleResult
+import org.apache.jmeter.protocol.http.util.HTTPConstants
+import org.apache.jmeter.protocol.http.control.HeaderManager
+import org.apache.jmeter.protocol.http.control.Header
+import org.apache.jmeter.protocol.http.util.HTTPArgument
 import java.util.Base64
-import java.time.Duration
 
 // Check if access token already exists in global properties
 Long accessTokenCreatedAt = Long.parseLong(props.get("global_access_token_created_at") ?: "0")
@@ -34,33 +35,50 @@ if (props.get("global_access_token") == null || now > accessTokenExpiresAt) {
     String requestBody = "grant_type=client_credentials"
     String authUrl = "${authBaseUrl}/oauth2/token"
 
-    // Create HTTP client with optional proxy configuration
-    HttpClient.Builder clientBuilder = HttpClient.newBuilder()
+    // Create JMeter HTTP sampler
+    HTTPSamplerProxy sampler = new HTTPSamplerProxy()
+    sampler.setDomain(authBaseUrl.replace("https://", "").replace("http://", ""))
+    sampler.setProtocol("https")
+    sampler.setPath("/oauth2/token")
+    sampler.setMethod(HTTPConstants.POST)
+    sampler.setPostBodyRaw(true)
     
-    // Configure proxy if provided
+    // Configure proxy based on environment
     String proxyHost = props.get("http.proxyHost")
     String proxyPort = props.get("http.proxyPort")
-    if (proxyHost && proxyPort && !proxyHost.isEmpty() && !proxyPort.isEmpty()) {
-        clientBuilder.proxy(new java.net.Proxy(java.net.Proxy.Type.HTTP, new java.net.InetSocketAddress(proxyHost, Integer.parseInt(proxyPort))))
-        log.info("Using HTTP proxy: ${proxyHost}:${proxyPort}")
+    if (proxyHost && !proxyHost.isEmpty() && proxyPort && !proxyPort.isEmpty()) {
+        sampler.setProxyHost(proxyHost)
+        sampler.setProxyPortInt(proxyPort)
+        log.info("Using proxy: ${proxyHost}:${proxyPort}")
+    } else {
+        // No proxy configured for local execution
+        sampler.setProxyHost("")
+        sampler.setProxyPortInt("0")
+        log.info("No proxy configured - using direct connection")
     }
     
-    HttpClient client = clientBuilder.build()
-    HttpRequest request = HttpRequest.newBuilder()
-        .uri(URI.create(authUrl))
-        .header("Content-Type", "application/x-www-form-urlencoded")
-        .header("Authorization", basicAuthHeader)
-        .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-        .build()
+    // Create header manager
+    HeaderManager headerManager = new HeaderManager()
+    headerManager.add(new Header("Content-Type", "application/x-www-form-urlencoded"))
+    headerManager.add(new Header("Authorization", basicAuthHeader))
+    sampler.setHeaderManager(headerManager)
+    
+    // Set the request body using addNonEncodedArgument
+    sampler.addNonEncodedArgument("", requestBody, "")
+    
+    // Proxy is automatically configured via JMeter command line options
+    
+    // Set timeouts
+    sampler.setConnectTimeout("30000")
+    sampler.setResponseTimeout("30000")
 
-    // Send request and extract token
-    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString())
-
-    if (response.statusCode() == 200) {
+    // Execute request
+    HTTPSampleResult result = sampler.sample()
+    
+    if (result.getResponseCode() == "200") {
         // Parse JSON response using JsonSlurper
-        String responseBody = response.body()
         def jsonSlurper = new groovy.json.JsonSlurper()
-        def jsonResponse = jsonSlurper.parseText(responseBody)
+        def jsonResponse = jsonSlurper.parseText(result.getResponseDataAsString())
         
         String extractedToken = jsonResponse.access_token
 
@@ -72,9 +90,7 @@ if (props.get("global_access_token") == null || now > accessTokenExpiresAt) {
             throw new Exception("Failed to extract access token from response")
         }
     } else {
-        throw new Exception("Authentication failed with status: " + response.statusCode() + ", Response: " + response.body())
-        // temp debugging line
-        println("Authentication failed with status: " + response.statusCode() + ", Response: " + response.body())
+        log.error("Authentication failed with status: " + result.getResponseCode() + ", Response: " + result.getResponseDataAsString())
     }
 } else {
     log.info("Reusing existing global access token")
