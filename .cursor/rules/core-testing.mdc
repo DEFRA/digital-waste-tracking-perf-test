@@ -10,9 +10,9 @@ alwaysApply: true
 This repository is dedicated to **performance testing only**. It does NOT handle functional testing, business logic validation, or API contract testing.
 
 ## Test Focus Areas
-- **Load Testing**: Normal expected load (10-50 users)
-- **Stress Testing**: Beyond normal capacity (25-50+ users)
-- **Spike Testing**: Sudden load bursts (5→50→5 users)
+- **Load Testing**: Normal expected load (50 users)
+- **Stress Testing**: Beyond normal capacity (100 users)
+- **Spike Testing**: Sudden load bursts (10→75→10 users)
 
 **Note**: Soak testing (long-duration tests for memory leaks/resource exhaustion) is not supported due to CDP Platform's 2-hour maximum runtime limit.
 
@@ -50,17 +50,17 @@ This repository is dedicated to **performance testing only**. It does NOT handle
 ### Load Tests (Normal Expected Load)
 
 #### Create Operations (Single Step)
-- **User Count**: 30 users
-- **Duration**: 30 minutes (1800s)
-- **Ramp-up**: 3 minutes (180s)
+- **User Count**: 50 users
+- **Duration**: 10 minutes (600s)
+- **Ramp-up**: 1 minute (60s)
 - **Think Time**: 500±1000ms (500-1500ms total)
 - **Response Time Threshold**: 3 seconds
 - **Purpose**: Test performance under normal expected load for simple operations
 
 #### Update Operations (Two-Step Workflow)
-- **User Count**: 30 users
-- **Duration**: 30 minutes (1800s)
-- **Ramp-up**: 3 minutes (180s)
+- **User Count**: 50 users
+- **Duration**: 10 minutes (600s)
+- **Ramp-up**: 1 minute (60s)
 - **Think Time**: 500±1000ms (500-1500ms total)
 - **Response Time Threshold**: 3 seconds
 - **Purpose**: Test performance under normal expected load for complex workflows
@@ -68,17 +68,17 @@ This repository is dedicated to **performance testing only**. It does NOT handle
 ### Stress Tests (Beyond Normal Capacity)
 
 #### Create Operations (Single Step)
-- **User Count**: 50 users
-- **Duration**: 30 minutes (1800s)
-- **Ramp-up**: 5 minutes (300s)
+- **User Count**: 100 users
+- **Duration**: 10 minutes (600s)
+- **Ramp-up**: 1 minute (60s)
 - **Think Time**: 500±1000ms (500-1500ms total)
 - **Response Time Threshold**: 5 seconds
 - **Purpose**: Find breaking points for simple operations
 
 #### Update Operations (Two-Step Workflow)
-- **User Count**: 50 users
-- **Duration**: 30 minutes (1800s)
-- **Ramp-up**: 5 minutes (300s)
+- **User Count**: 100 users
+- **Duration**: 10 minutes (600s)
+- **Ramp-up**: 1 minute (60s)
 - **Think Time**: 500±1000ms (500-1500ms total)
 - **Response Time Threshold**: 5 seconds
 - **Purpose**: Find breaking points for complex workflows
@@ -86,10 +86,10 @@ This repository is dedicated to **performance testing only**. It does NOT handle
 ### Spike Tests (Sudden Load Bursts)
 
 #### Both Create and Update Operations
-- **Phase 1**: 5 users, 30s ramp-up, 5min duration (baseline)
-- **Phase 2**: 50 users, 5s ramp-up, 1min duration (dramatic spike)
-- **Phase 3**: 5 users, 10s ramp-up, 5min duration (recovery)
-- **Total Duration**: ~11 minutes (5min + 1min + 5min)
+- **Phase 1**: 10 users, 30s ramp-up, 3min duration (baseline)
+- **Phase 2**: 75 users, 5s ramp-up, 3min duration (dramatic spike)
+- **Phase 3**: 10 users, 10s ramp-up, 3min duration (recovery)
+- **Total Duration**: ~9 minutes (3min + 3min + 3min)
 - **Think Time**: 500±1000ms (500-1500ms total)
 - **Response Time Threshold**: 8 seconds (all phases)
 

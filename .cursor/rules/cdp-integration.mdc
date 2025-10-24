@@ -41,8 +41,8 @@ alwaysApply: true
 ### Maximum Runtime Limit
 - **CDP Platform has a 2-hour maximum runtime limit**
 - Test processes will be automatically killed if they exceed this limit
-- **Critical**: Individual test runs should be executed rather than running the complete test suite
-- **Test Pack Duration**: Current test pack duration is ~2 hours 22 minutes
+- **Note**: Complete test suite can now be executed within the 2-hour limit
+- **Test Pack Duration**: Current test pack duration is ~58 minutes
 
 ### Soak Testing Limitation
 - Due to the 2-hour runtime limit, soak testing cannot be performed in the CDP CI environment
