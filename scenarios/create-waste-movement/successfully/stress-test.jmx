@@ -23,7 +23,7 @@
         <stringProp name="script"></stringProp>
       </JSR223PreProcessor>
       <hashTree/>
-      <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Get Access Token">
+      <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Get Access Token" enabled="true">
         <stringProp name="scriptLanguage">groovy</stringProp>
         <stringProp name="filename">scripts/get_accessToken.groovy</stringProp>
         <stringProp name="parameters"></stringProp>
@@ -34,13 +34,13 @@
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Create Waste Movement" enabled="true">
         <intProp name="ThreadGroup.num_threads">100</intProp>
         <intProp name="ThreadGroup.ramp_time">60</intProp>
+        <longProp name="ThreadGroup.duration">600</longProp>
         <longProp name="ThreadGroup.delay">0</longProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
-        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
-        <stringProp name="ThreadGroup.duration">600</stringProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
-          <stringProp name="LoopController.loops">-1</stringProp>
+          <intProp name="LoopController.loops">-1</intProp>
           <boolProp name="LoopController.continue_forever">false</boolProp>
         </elementProp>
       </ThreadGroup>
@@ -81,34 +81,35 @@
             </collectionProp>
           </HeaderManager>
           <hashTree/>
-          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Verify Create Response Success" enabled="true">
-            <collectionProp name="Assertion.test_strings">
-              <stringProp name="49586">200</stringProp>
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert Create Response Code was Successful" enabled="true">
+            <collectionProp name="Asserion.test_strings">
+              <stringProp name="49587">201</stringProp>
             </collectionProp>
             <stringProp name="Assertion.custom_message"></stringProp>
             <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             <boolProp name="Assertion.assume_success">false</boolProp>
-            <intProp name="Assertion.test_type">2</intProp>
+            <intProp name="Assertion.test_type">8</intProp>
           </ResponseAssertion>
           <hashTree/>
-          <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Response Time Threshold" enabled="true">
+          <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Assert Response Time Threshold" enabled="true">
             <stringProp name="DurationAssertion.duration">5000</stringProp>
           </DurationAssertion>
           <hashTree/>
-          <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="Extract Global Movement ID" enabled="true">
-            <stringProp name="JSONPostProcessor.referenceNames">globalMovementId</stringProp>
-            <stringProp name="JSONPostProcessor.jsonPathExprs">$.globalMovementId</stringProp>
-            <stringProp name="JSONPostProcessor.match_numbers">1</stringProp>
-            <stringProp name="JSONPostProcessor.defaultValues">NOT_FOUND</stringProp>
-          </JSONPostProcessor>
+          <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert Waste Tracking ID exists in JSON " enabled="true">
+            <stringProp name="JSON_PATH">$.wasteTrackingId</stringProp>
+            <stringProp name="EXPECTED_VALUE"></stringProp>
+            <boolProp name="JSONVALIDATION">false</boolProp>
+            <boolProp name="EXPECT_NULL">false</boolProp>
+            <boolProp name="INVERT">false</boolProp>
+            <boolProp name="ISREGEX">false</boolProp>
+          </JSONPathAssertion>
+          <hashTree/>
+          <UniformRandomTimer guiclass="UniformRandomTimerGui" testclass="UniformRandomTimer" testname="Think Time" enabled="true">
+            <stringProp name="ConstantTimer.delay">500</stringProp>
+            <stringProp name="RandomTimer.range">1000</stringProp>
+          </UniformRandomTimer>
           <hashTree/>
         </hashTree>
-      </hashTree>
-      <UniformRandomTimer guiclass="UniformRandomTimerGui" testclass="UniformRandomTimer" testname="Think Time" enabled="true">
-        <stringProp name="ConstantTimer.delay">500</stringProp>
-        <stringProp name="RandomTimer.range">1000</stringProp>
-      </UniformRandomTimer>
-      <hashTree/>
       </hashTree>
     </hashTree>
   </hashTree>
