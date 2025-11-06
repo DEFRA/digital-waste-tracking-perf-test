@@ -76,7 +76,7 @@
               </elementProp>
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">${__P(global_access_token)}</stringProp>
+                <stringProp name="Header.value">Bearer ${__P(global_access_token)}</stringProp>
               </elementProp>
             </collectionProp>
           </HeaderManager>
@@ -155,7 +155,7 @@
               </elementProp>
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">${__P(global_access_token)}</stringProp>
+                <stringProp name="Header.value">Bearer ${__P(global_access_token)}</stringProp>
               </elementProp>
             </collectionProp>
           </HeaderManager>
@@ -234,7 +234,7 @@
               </elementProp>
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">${__P(global_access_token)}</stringProp>
+                <stringProp name="Header.value">Bearer ${__P(global_access_token)}</stringProp>
               </elementProp>
             </collectionProp>
           </HeaderManager>
