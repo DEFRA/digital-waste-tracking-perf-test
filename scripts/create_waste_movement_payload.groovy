@@ -1,26 +1,119 @@
 // Get variables from JMeter system properties
-String organisationApiId = props.get("organisationApiId")
+String apiCode = props.get("apiCode")
 String testType = vars.get("testType")
 String timestamp = new Date().format("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
 String threadNum = ctx.getThreadNum().toString()
+String wasteDescription1 = "Create Waste Movement: ${testType} - ${threadNum} - Primary waste containing industrial waste and hazardous heavy metals"
+String wasteDescription2 = "Create Waste Movement: ${testType} - ${threadNum} - Secondary waste containing plastic packaging and minor contaminants"
 
 // JSON payload as string with interpolation
 String postPayload = """{
-  "organisationApiId": "${organisationApiId}",
+  "apiCode": "${apiCode}",
   "dateTimeReceived": "${timestamp}",
+  "reasonForNoConsignmentCode": "Carrier did not provide documentation",
   "wasteItems": [
     {
       "ewcCodes": [
-        "020101"
+        "200121"
       ],
-      "wasteDescription": "Create Waste Movement: ${testType} - ${threadNum}",
+      "wasteDescription": "${wasteDescription1}",
       "physicalForm": "Mixed",
-      "numberOfContainers": 3,
+      "numberOfContainers": 15,
       "typeOfContainers": "SKI",
       "weight": {
         "metric": "Tonnes",
-        "amount": 2.5,
-        "isEstimate": false
+        "amount": 1.2,
+        "isEstimate": true
+      },
+      "containsPops": true,
+      "pops": {
+        "sourceOfComponents": "CARRIER_PROVIDED",
+        "components": [
+          {
+            "code": "CHL",
+            "concentration": 250
+          },
+          {
+            "code": "TOX",
+            "concentration": 156.4
+          },
+          {
+            "code": "DCF",
+            "concentration": 0.8
+          },
+          {
+            "code": "DDT",
+            "concentration": 1.2
+          }
+        ]
+      },
+      "containsHazardous": true,
+      "hazardous": {
+        "hazCodes": [
+          "HP_1",
+          "HP_3",
+          "HP_6"
+        ],
+        "sourceOfComponents": "CARRIER_PROVIDED",
+        "components": [
+          {
+            "name": "Mercury",
+            "concentration": 0.35
+          },
+          {
+            "name": "Arsenic",
+            "concentration": 300
+          },
+          {
+            "name": "Chromium",
+            "concentration": 0.42
+          },
+          {
+            "name": "Lead",
+            "concentration": 0.89
+          }
+        ]
+      },
+      "disposalOrRecoveryCodes": [
+        {
+          "code": "R1",
+          "weight": {
+            "metric": "Tonnes",
+            "amount": 0.75,
+            "isEstimate": false
+          }
+        }
+      ]
+    },
+    {
+      "ewcCodes": [
+        "150110"
+      ],
+      "wasteDescription": "${wasteDescription2}",
+      "physicalForm": "Solid",
+      "numberOfContainers": 5,
+      "typeOfContainers": "SKI",
+      "weight": {
+        "metric": "Tonnes",
+        "amount": 1.1,
+        "isEstimate": true
+      },
+      "containsPops": false,
+      "pops": {
+        "sourceOfComponents": "NOT_PROVIDED"
+      },
+      "containsHazardous": true,
+      "hazardous": {
+        "hazCodes": [
+          "HP_6"
+        ],
+        "sourceOfComponents": "CARRIER_PROVIDED",
+        "components": [
+          {
+            "name": "Arsenic",
+            "concentration": 75
+          }
+        ]
       },
       "disposalOrRecoveryCodes": [
         {
@@ -37,12 +130,27 @@ String postPayload = """{
   "carrier": {
     "organisationName": "Carrier Ltd",
     "registrationNumber": "CBDL999999",
-    "meansOfTransport": "Rail"
+    "address": {
+      "fullAddress": "321 Test Street, Test City",
+      "postcode": "TC2 2CD"
+    },
+    "emailAddress": "test@carrier.com",
+    "phoneNumber": "01234567890",
+    "meansOfTransport": "Road",
+    "vehicleRegistration": "AB12 CDE"
   },
   "receiver": {
     "organisationName": "Receiver Ltd",
     "emailAddress": "receiver@test.com",
-    "authorisationNumbers": ["PPC/A/9999999"]
+    "phoneNumber": "01234567890",
+    "authorisationNumbers": [
+      "PPC/A/9999999",
+      "PPC/A/SEPA9999-9999"
+    ],
+    "regulatoryPositionStatements": [
+      123,
+      456
+    ]
   },
   "receipt": {
     "address": {

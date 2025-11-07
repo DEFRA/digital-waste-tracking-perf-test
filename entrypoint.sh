@@ -21,7 +21,7 @@ check_variable "$CI" "CI"
 check_variable "$COGNITO_CLIENT_ID" "COGNITO_CLIENT_ID"
 check_variable "$COGNITO_CLIENT_SECRET" "COGNITO_CLIENT_SECRET"
 check_variable "$COGNITO_OAUTH_BASE_URL" "COGNITO_OAUTH_BASE_URL"
-check_variable "$ORGANISATION_API_ID" "ORGANISATION_API_ID"
+check_variable "$API_CODE" "API_CODE"
 
 # Log the run_id and environment if CI is true
 if [ "$CI" = "true" ]; then
@@ -96,7 +96,7 @@ for jmx_file in $jmx_files; do
   echo "\n\nRunning: $jmx_file\n\n"
   jmeter -n -t "$jmx_file" -l "${JM_JTL_FILE}" -j ${JM_LOG_TEST} \
     -Jenvironment=${ENVIRONMENT} \
-    -JorganisationApiId=${ORGANISATION_API_ID} \
+    -JapiCode=${API_CODE} \
     -JclientId=${COGNITO_CLIENT_ID} \
     -JclientSecret=${COGNITO_CLIENT_SECRET} \
     -JauthBaseUrl=${COGNITO_OAUTH_BASE_URL} \

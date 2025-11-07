@@ -212,7 +212,7 @@ alwaysApply: true
 - Use `${postPayload}` for POST/create operations
 - Use `${putPayload}` for PUT/update operations
 - Use `${testType}` for test-specific customization
-- Use `${globalMovementId}` for data extraction and updates
+- Use `${wasteTrackingId}` for data extraction and updates
 
 ## DurationAssertion Configuration
 
@@ -276,7 +276,7 @@ alwaysApply: true
 
 ### PostProcessor Names
 - **Data Extraction**: `"Extract [Data Type]"`
-- **Examples**: `"Extract Global Movement ID"`
+- **Examples**: `"Extract Waste Tracking ID"`
 
 ### Naming Principles
 - **Descriptive**: Names should clearly describe what the component does
