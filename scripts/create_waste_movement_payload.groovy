@@ -10,7 +10,7 @@ String wasteDescription2 = "Create Waste Movement: ${testType} - ${threadNum} - 
 String postPayload = """{
   "apiCode": "${apiCode}",
   "dateTimeReceived": "${timestamp}",
-  "reasonForNoConsignmentCode": "Carrier did not provide documentation",
+  "reasonForNoConsignmentCode": "NO_DOC_WITH_WASTE",
   "wasteItems": [
     {
       "ewcCodes": [
@@ -27,7 +27,7 @@ String postPayload = """{
       },
       "containsPops": true,
       "pops": {
-        "sourceOfComponents": "CARRIER_PROVIDED",
+        "sourceOfComponents": "PROVIDED_WITH_WASTE",
         "components": [
           {
             "code": "CHL",
@@ -54,7 +54,7 @@ String postPayload = """{
           "HP_3",
           "HP_6"
         ],
-        "sourceOfComponents": "CARRIER_PROVIDED",
+        "sourceOfComponents": "PROVIDED_WITH_WASTE",
         "components": [
           {
             "name": "Mercury",
@@ -107,7 +107,7 @@ String postPayload = """{
         "hazCodes": [
           "HP_6"
         ],
-        "sourceOfComponents": "CARRIER_PROVIDED",
+        "sourceOfComponents": "PROVIDED_WITH_WASTE",
         "components": [
           {
             "name": "Arsenic",
@@ -140,13 +140,10 @@ String postPayload = """{
     "vehicleRegistration": "AB12 CDE"
   },
   "receiver": {
-    "organisationName": "Receiver Ltd",
+    "siteName": "Receiver Ltd",
     "emailAddress": "receiver@test.com",
     "phoneNumber": "01234567890",
-    "authorisationNumbers": [
-      "PPC/A/9999999",
-      "PPC/A/SEPA9999-9999"
-    ],
+    "authorisationNumber": "PPC/A/SEPA9999-9999",
     "regulatoryPositionStatements": [
       123,
       456
