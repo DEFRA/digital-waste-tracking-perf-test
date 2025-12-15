@@ -88,6 +88,7 @@ echo "Using JM_LOG_TEST: $JM_LOG_TEST"
 echo "Using JM_JTL_FILE: $JM_JTL_FILE"
 echo "Using CI: $CI"
 echo "Using ENVIRONMENT: $ENVIRONMENT"
+echo "Using DEBUG: ${DEBUG:-false}"
 
 
 # Run all JMX files in scenarios folder (including subdirectories)
@@ -101,6 +102,7 @@ for jmx_file in $jmx_files; do
     -JclientSecret=${COGNITO_CLIENT_SECRET} \
     -JauthBaseUrl=${COGNITO_OAUTH_BASE_URL} \
     -Jresultcollector.action_if_file_exists=APPEND \
+    -Jdebug=${DEBUG:-false} \
     ${JM_COMMAND_LINE_PROXY_OPTION}
   single_test_exit_code=$?
   if [ "$single_test_exit_code" -ne 0 ]; then
