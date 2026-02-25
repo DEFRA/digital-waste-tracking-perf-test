@@ -101,8 +101,14 @@ for jmx_file in $jmx_files; do
     -JclientId=${COGNITO_CLIENT_ID} \
     -JclientSecret=${COGNITO_CLIENT_SECRET} \
     -JauthBaseUrl=${COGNITO_OAUTH_BASE_URL} \
+    -JbackendAuthUser=${BACKEND_AUTH_USER:-waste-organisation-backend} \
+    -JbackendAuthPassword=${BACKEND_AUTH_PASSWORD} \
+    -JcdpApiKey=${CDP_API_KEY} \
     -Jresultcollector.action_if_file_exists=APPEND \
     -Jdebug=${DEBUG:-false} \
+    -Jjmeter.save.saveservice.response_data=true \
+    -Jjmeter.save.saveservice.response_message=true \
+    -Jjmeter.save.saveservice.assertion_results_failure_message=true \
     ${JM_COMMAND_LINE_PROXY_OPTION}
   single_test_exit_code=$?
   if [ "$single_test_exit_code" -ne 0 ]; then
