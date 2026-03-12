@@ -16,7 +16,7 @@ check_variable() {
 }
 
 check_variable "$ENVIRONMENT" "ENVIRONMENT"
-check_variable "$TEST_SCENARIO" "TEST_SCENARIO"
+check_variable "$PROFILE" "PROFILE"
 check_variable "$CI" "CI"
 check_variable "$COGNITO_CLIENT_ID" "COGNITO_CLIENT_ID"
 check_variable "$COGNITO_CLIENT_SECRET" "COGNITO_CLIENT_SECRET"
@@ -54,19 +54,30 @@ for fileorFolder in ${JM_REPORT_FOLDER} ${JM_LOG_FOLDER} ${JM_RESULTS_FOLDER}; d
   fi
 done
 
-# Build list of JMX files to run
-if [ "${TEST_SCENARIO}" = "all" ]; then
-  echo "\n\nRunning all scenarios"
-  # Build list of all JMX files in scenarios folder (including subdirectories)
-  jmx_files=$(find scenarios -name "*.jmx" -type f 2>/dev/null || echo "")
-  if [ -z "$jmx_files" ]; then
-    echo "No JMX files found in scenarios directory"
-    exit 1
-  fi
-else
-  echo "\n\nRunning scenario: ${TEST_SCENARIO}"
-  SCENARIOFILE=${JM_SCENARIOS}/${TEST_SCENARIO}
-  jmx_files="${SCENARIOFILE}"
+# Build list of JMX files: PROFILE is one of external-api, bulk-upload, all, or a path to a .jmx under scenarios
+echo "\n\nRunning profile: ${PROFILE}"
+case "$PROFILE" in
+  external-api)
+    jmx_files=$(find "${JM_SCENARIOS}/create-waste-movement" "${JM_SCENARIOS}/update-waste-movement" -name "*.jmx" -type f 2>/dev/null | sort || true)
+    ;;
+  bulk-upload)
+    jmx_files=$(find "${JM_SCENARIOS}/bulk-create-waste-movement" "${JM_SCENARIOS}/bulk-update-waste-movement" -name "*.jmx" -type f 2>/dev/null | sort || true)
+    ;;
+  all)
+    jmx_files=$(find "${JM_SCENARIOS}" -name "*.jmx" -type f 2>/dev/null | sort || true)
+    ;;
+  *)
+    if [ -f "${JM_SCENARIOS}/${PROFILE}" ]; then
+      jmx_files="${JM_SCENARIOS}/${PROFILE}"
+    else
+      echo "Error: PROFILE='$PROFILE' is not supported (Supported profiles: external-api, bulk-upload, all, or a path to a JMX under scenarios e.g. bulk-update-waste-movement/successfully/baseline-test.jmx)."
+      exit 1
+    fi
+    ;;
+esac
+if [ -z "$jmx_files" ]; then
+  echo "No JMX files found for profile: $PROFILE"
+  exit 1
 fi
 
 # Parse HTTP_PROXY if provided
@@ -88,8 +99,9 @@ echo "Using JM_LOG_TEST: $JM_LOG_TEST"
 echo "Using JM_JTL_FILE: $JM_JTL_FILE"
 echo "Using CI: $CI"
 echo "Using ENVIRONMENT: $ENVIRONMENT"
+echo "Using PROFILE: $PROFILE"
 echo "Using DEBUG: ${DEBUG:-false}"
-
+echo "Using jmx_files: $jmx_files"
 
 # Run all JMX files in scenarios folder (including subdirectories)
 test_exit_code=0
