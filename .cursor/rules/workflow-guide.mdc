@@ -15,10 +15,10 @@ alwaysApply: true
 
 ## Key Files to Understand
 - `scenarios/` - Contains organized JMX test files by operation and test type
-- `scripts/get_accessToken.groovy` - Shared OAuth2 authentication script for public API tests
+- `scripts/auth/get_accessToken.groovy` - Shared OAuth2 authentication script for public API tests
 - `scripts/auth/get_waste_organisation_backend_auth.groovy` - Backend authentication script for bulk tests
-- `scripts/create_waste_movement_payload.groovy` - Dynamic payload generation for create operations (sets `${postPayload}`)
-- `scripts/update_waste_movement_payload.groovy` - Dynamic payload generation for update operations (sets `${putPayload}`)
+- `scripts/payloads/create_waste_movement_payload.groovy` - Dynamic payload generation for create operations (sets `${postPayload}`)
+- `scripts/payloads/update_waste_movement_payload.groovy` - Dynamic payload generation for update operations (sets `${putPayload}`)
 - `scripts/payloads/bulk_create_waste_movement_payload.groovy` - Dynamic payload generation for bulk create operations (sets `${bulkPostPayload}`)
 - `scripts/payloads/bulk_update_waste_movement_payload.groovy` - Dynamic payload generation for bulk update operations (sets `${bulkPutPayload}`)
 - `local-entrypoint.sh` - Local development script with shared authentication

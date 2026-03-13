@@ -17,7 +17,7 @@
     <hashTree>
       <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Get Access Token">
         <stringProp name="scriptLanguage">groovy</stringProp>
-        <stringProp name="filename">scripts/get_accessToken.groovy</stringProp>
+        <stringProp name="filename">scripts/auth/get_accessToken.groovy</stringProp>
         <stringProp name="parameters"></stringProp>
         <stringProp name="cacheKey">false</stringProp>
         <stringProp name="script"></stringProp>
@@ -25,7 +25,7 @@
       <hashTree/>
       <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Generate Create Waste Movement Payload" enabled="true">
         <stringProp name="scriptLanguage">groovy</stringProp>
-        <stringProp name="filename">scripts/create_waste_movement_payload.groovy</stringProp>
+        <stringProp name="filename">scripts/payloads/create_waste_movement_payload.groovy</stringProp>
         <stringProp name="parameters"></stringProp>
         <stringProp name="cacheKey">false</stringProp>
         <stringProp name="script"></stringProp>
@@ -66,6 +66,14 @@
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="Log Error Response" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="filename">scripts/logging/log_error_response.groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+            <stringProp name="script"></stringProp>
+          </JSR223PostProcessor>
+          <hashTree/>
           <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
@@ -101,14 +109,6 @@
             <boolProp name="INVERT">false</boolProp>
             <boolProp name="ISREGEX">false</boolProp>
           </JSONPathAssertion>
-          <hashTree/>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="Log Error Response" enabled="true">
-            <stringProp name="scriptLanguage">groovy</stringProp>
-            <stringProp name="filename">scripts/log_error_response.groovy</stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="cacheKey">false</stringProp>
-            <stringProp name="script"></stringProp>
-          </JSR223PostProcessor>
           <hashTree/>
           <UniformRandomTimer guiclass="UniformRandomTimerGui" testclass="UniformRandomTimer" testname="Think Time" enabled="true">
             <stringProp name="ConstantTimer.delay">500</stringProp>

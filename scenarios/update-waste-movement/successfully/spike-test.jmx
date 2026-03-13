@@ -17,7 +17,7 @@
     <hashTree>
       <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Generate Create Waste Movement Payload">
         <stringProp name="scriptLanguage">groovy</stringProp>
-        <stringProp name="filename">scripts/create_waste_movement_payload.groovy</stringProp>
+        <stringProp name="filename">scripts/payloads/create_waste_movement_payload.groovy</stringProp>
         <stringProp name="parameters"></stringProp>
         <stringProp name="cacheKey">false</stringProp>
         <stringProp name="script"></stringProp>
@@ -25,7 +25,7 @@
       <hashTree/>
       <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Get Access Token" enabled="true">
         <stringProp name="scriptLanguage">groovy</stringProp>
-        <stringProp name="filename">scripts/get_accessToken.groovy</stringProp>
+        <stringProp name="filename">scripts/auth/get_accessToken.groovy</stringProp>
         <stringProp name="parameters"></stringProp>
         <stringProp name="cacheKey">false</stringProp>
         <stringProp name="script"></stringProp>
@@ -33,7 +33,7 @@
       <hashTree/>
       <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Generate Update Waste Movement Payload" enabled="true">
         <stringProp name="scriptLanguage">groovy</stringProp>
-        <stringProp name="filename">scripts/update_waste_movement_payload.groovy</stringProp>
+        <stringProp name="filename">scripts/payloads/update_waste_movement_payload.groovy</stringProp>
         <stringProp name="parameters"></stringProp>
         <stringProp name="cacheKey">false</stringProp>
         <stringProp name="script"></stringProp>
