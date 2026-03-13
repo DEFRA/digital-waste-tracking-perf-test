@@ -25,10 +25,14 @@ alwaysApply: true
 - Configure proper working directory in container
 
 ## Result Reporting
-- Results are automatically published to CDP Portal
-- Use CDP-compatible result formats
-- Include proper test metadata and labels
-- Ensure results are accessible for analysis
+- Results are written into a single consolidated JMeter JTL file (`results/results.jtl`)
+- An HTML report is generated into the `reports/` directory
+- In CI mode (`CI=true`), `entrypoint.sh` uploads:
+  - The combined JTL file
+  - The JMeter log files
+  - The entire HTML report directory
+  to the S3 location configured by `RESULTS_OUTPUT_S3_PATH` (using the `S3_ENDPOINT` endpoint)
+- These uploaded artifacts are used by the CDP Platform to display performance results in the portal
 
 ## Local Testing
 - Support LocalStack for local development

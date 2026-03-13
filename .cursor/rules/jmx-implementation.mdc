@@ -72,10 +72,10 @@ alwaysApply: true
 - **Example**: 1 user, 1 loop = single request for functional validation
 
 ### Spike Test Pattern (Multi-Phase Execution)
-- **Phase 1 - Low Load**: 5 users, 30s ramp-up, 300s duration
-- **Phase 2 - High Load**: 50 users, 5s ramp-up, 60s duration  
-- **Phase 3 - Recovery**: 5 users, 10s ramp-up, 300s duration
-- **Total Duration**: ~11 minutes (5min + 1min + 5min)
+- **Phase 1 - Low Load**: 10 users, 30s ramp-up, 180s duration
+- **Phase 2 - High Load**: 75 users, 5s ramp-up, 180s duration  
+- **Phase 3 - Recovery**: 10 users, 10s ramp-up, 180s duration
+- **Total Duration**: ~9 minutes (3min + 3min + 3min)
 - **Purpose**: Test system behavior under sudden load spikes and recovery
 
 ### Thread Group Properties
