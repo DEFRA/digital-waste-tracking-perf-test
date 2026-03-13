@@ -10,10 +10,6 @@ alwaysApply: true
 - `README.md` - Repository overview, setup instructions, test execution, and high-level test organization
 - `.cursor/rules/` - LLM interaction rules and implementation guidelines
 
-## Recommended Additional Documentation
-- `TEST_ORGANIZATION.md` - (optional) Detailed test structure and usage guide
-- `PAYLOAD_STRUCTURE.md` - (optional) Detailed payload file documentation and examples
-
 ## Documentation Updates
 - Update documentation when adding new tests
 - Keep documentation in sync with actual test structure
