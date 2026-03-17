@@ -6,7 +6,7 @@ String threadNum = ctx.getThreadNum().toString()
 
 String orgId = UUID.randomUUID().toString()
 
-int movementCount = Integer.parseInt(vars.get("bulkMovementCount") ?: "500")
+int movementCount = Integer.parseInt(vars.get("bulkMovementCount") ?: "250")
 def movements = (1..movementCount).collect { idx ->
   [
     submittingOrganisation: [
