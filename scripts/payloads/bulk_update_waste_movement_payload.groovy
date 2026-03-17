@@ -3,7 +3,7 @@ import groovy.json.JsonBuilder
 String testType = vars.get("testType")
 String timestamp = new Date().format("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
 String threadNum = ctx.getThreadNum().toString()
-String orgId = UUID.randomUUID().toString()
+String orgId = vars.get("bulkOrganisationId") ?: UUID.randomUUID().toString()
 
 List<String> wasteTrackingIds = vars.get("wasteTrackingIds")?.split(",")?.toList() ?: []
 

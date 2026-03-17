@@ -61,3 +61,4 @@ def movements = (1..movementCount).collect { idx ->
 
 String payload = new JsonBuilder(movements).toString()
 vars.put("bulkPostPayload", payload)
+vars.put("bulkOrganisationId", orgId)

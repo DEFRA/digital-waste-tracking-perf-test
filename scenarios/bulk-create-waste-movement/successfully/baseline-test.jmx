@@ -28,14 +28,6 @@
         <stringProp name="script"></stringProp>
       </JSR223PreProcessor>
       <hashTree/>
-      <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Generate Bulk Create Waste Movement Payload" enabled="true">
-        <stringProp name="scriptLanguage">groovy</stringProp>
-        <stringProp name="filename">scripts/payloads/bulk_create_waste_movement_payload.groovy</stringProp>
-        <stringProp name="parameters"></stringProp>
-        <stringProp name="cacheKey">false</stringProp>
-        <stringProp name="script"></stringProp>
-      </JSR223PreProcessor>
-      <hashTree/>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Bulk Create Waste Movement" enabled="true">
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">1</intProp>
@@ -69,6 +61,14 @@
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Generate Bulk Create Waste Movement Payload" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="filename">scripts/payloads/bulk_create_waste_movement_payload.groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+            <stringProp name="script"></stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
           <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="Log Error Response" enabled="true">
             <stringProp name="scriptLanguage">groovy</stringProp>
             <stringProp name="filename">scripts/logging/log_error_response.groovy</stringProp>
