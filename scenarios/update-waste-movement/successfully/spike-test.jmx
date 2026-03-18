@@ -31,6 +31,14 @@
         <stringProp name="script"></stringProp>
       </JSR223PreProcessor>
       <hashTree/>
+      <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Configure Waste Movement External API URL">
+        <stringProp name="scriptLanguage">groovy</stringProp>
+        <stringProp name="filename">scripts/config/configure_waste_movement_external_api_url.groovy</stringProp>
+        <stringProp name="parameters"></stringProp>
+        <stringProp name="cacheKey">false</stringProp>
+        <stringProp name="script"></stringProp>
+      </JSR223PreProcessor>
+      <hashTree/>
       <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Generate Update Waste Movement Payload" enabled="true">
         <stringProp name="scriptLanguage">groovy</stringProp>
         <stringProp name="filename">scripts/payloads/update_waste_movement_payload.groovy</stringProp>
@@ -56,10 +64,11 @@
           <stringProp name="HTTPSampler.embedded_url_re">.*</stringProp>
           <intProp name="HTTPSampler.connect_timeout">60000</intProp>
           <intProp name="HTTPSampler.response_timeout">60000</intProp>
-          <stringProp name="HTTPSampler.domain">waste-movement-external-api.api.${__P(environment)}.cdp-int.defra.cloud</stringProp>
-          <stringProp name="HTTPSampler.protocol">https</stringProp>
+          <stringProp name="HTTPSampler.domain">${__P(wasteMovementExternalApiDomain)}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${__P(wasteMovementExternalApiProtocol)}</stringProp>
+          <stringProp name="HTTPSampler.port">${__P(wasteMovementExternalApiPort)}</stringProp>
           <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
-          <stringProp name="HTTPSampler.path">/movements/receive</stringProp>
+          <stringProp name="HTTPSampler.path">${__P(wasteMovementExternalApiBasePath)}/movements/receive</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
           <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
@@ -87,6 +96,14 @@
               </elementProp>
             </collectionProp>
           </HeaderManager>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert Waste Tracking ID Count" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+            <stringProp name="filename">scripts/logging/x.groovy</stringProp>
+            <stringProp name="script"></stringProp>
+          </JSR223Assertion>
           <hashTree/>
           <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert Create Response Code was Successful" enabled="true">
             <collectionProp name="Asserion.test_strings">
@@ -128,10 +145,11 @@
           <stringProp name="HTTPSampler.embedded_url_re">.*</stringProp>
           <intProp name="HTTPSampler.connect_timeout">60000</intProp>
           <intProp name="HTTPSampler.response_timeout">60000</intProp>
-          <stringProp name="HTTPSampler.domain">waste-movement-external-api.api.${__P(environment)}.cdp-int.defra.cloud</stringProp>
-          <stringProp name="HTTPSampler.protocol">https</stringProp>
+          <stringProp name="HTTPSampler.domain">${__P(wasteMovementExternalApiDomain)}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${__P(wasteMovementExternalApiProtocol)}</stringProp>
+          <stringProp name="HTTPSampler.port">${__P(wasteMovementExternalApiPort)}</stringProp>
           <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
-          <stringProp name="HTTPSampler.path">/movements/${wasteTrackingId}/receive</stringProp>
+          <stringProp name="HTTPSampler.path">${__P(wasteMovementExternalApiBasePath)}/movements/${wasteTrackingId}/receive</stringProp>
           <stringProp name="HTTPSampler.method">PUT</stringProp>
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
           <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
@@ -159,6 +177,14 @@
               </elementProp>
             </collectionProp>
           </HeaderManager>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert Waste Tracking ID Count" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+            <stringProp name="filename">scripts/logging/x.groovy</stringProp>
+            <stringProp name="script"></stringProp>
+          </JSR223Assertion>
           <hashTree/>
           <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert Update Response Code was Successful" enabled="true">
             <collectionProp name="Asserion.test_strings">
@@ -198,10 +224,11 @@
           <stringProp name="HTTPSampler.embedded_url_re">.*</stringProp>
           <intProp name="HTTPSampler.connect_timeout">60000</intProp>
           <intProp name="HTTPSampler.response_timeout">60000</intProp>
-          <stringProp name="HTTPSampler.domain">waste-movement-external-api.api.${__P(environment)}.cdp-int.defra.cloud</stringProp>
-          <stringProp name="HTTPSampler.protocol">https</stringProp>
+          <stringProp name="HTTPSampler.domain">${__P(wasteMovementExternalApiDomain)}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${__P(wasteMovementExternalApiProtocol)}</stringProp>
+          <stringProp name="HTTPSampler.port">${__P(wasteMovementExternalApiPort)}</stringProp>
           <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
-          <stringProp name="HTTPSampler.path">/movements/receive</stringProp>
+          <stringProp name="HTTPSampler.path">${__P(wasteMovementExternalApiBasePath)}/movements/receive</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
           <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
@@ -229,6 +256,14 @@
               </elementProp>
             </collectionProp>
           </HeaderManager>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert Waste Tracking ID Count" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+            <stringProp name="filename">scripts/logging/x.groovy</stringProp>
+            <stringProp name="script"></stringProp>
+          </JSR223Assertion>
           <hashTree/>
           <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert Create Response Code was Successful" enabled="true">
             <collectionProp name="Asserion.test_strings">
@@ -270,10 +305,11 @@
           <stringProp name="HTTPSampler.embedded_url_re">.*</stringProp>
           <intProp name="HTTPSampler.connect_timeout">60000</intProp>
           <intProp name="HTTPSampler.response_timeout">60000</intProp>
-          <stringProp name="HTTPSampler.domain">waste-movement-external-api.api.${__P(environment)}.cdp-int.defra.cloud</stringProp>
-          <stringProp name="HTTPSampler.protocol">https</stringProp>
+          <stringProp name="HTTPSampler.domain">${__P(wasteMovementExternalApiDomain)}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${__P(wasteMovementExternalApiProtocol)}</stringProp>
+          <stringProp name="HTTPSampler.port">${__P(wasteMovementExternalApiPort)}</stringProp>
           <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
-          <stringProp name="HTTPSampler.path">/movements/${wasteTrackingId}/receive</stringProp>
+          <stringProp name="HTTPSampler.path">${__P(wasteMovementExternalApiBasePath)}/movements/${wasteTrackingId}/receive</stringProp>
           <stringProp name="HTTPSampler.method">PUT</stringProp>
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
           <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
@@ -301,6 +337,14 @@
               </elementProp>
             </collectionProp>
           </HeaderManager>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert Waste Tracking ID Count" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+            <stringProp name="filename">scripts/logging/x.groovy</stringProp>
+            <stringProp name="script"></stringProp>
+          </JSR223Assertion>
           <hashTree/>
           <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert Update Response Code was Successful" enabled="true">
             <collectionProp name="Asserion.test_strings">
@@ -340,10 +384,11 @@
           <stringProp name="HTTPSampler.embedded_url_re">.*</stringProp>
           <intProp name="HTTPSampler.connect_timeout">60000</intProp>
           <intProp name="HTTPSampler.response_timeout">60000</intProp>
-          <stringProp name="HTTPSampler.domain">waste-movement-external-api.api.${__P(environment)}.cdp-int.defra.cloud</stringProp>
-          <stringProp name="HTTPSampler.protocol">https</stringProp>
+          <stringProp name="HTTPSampler.domain">${__P(wasteMovementExternalApiDomain)}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${__P(wasteMovementExternalApiProtocol)}</stringProp>
+          <stringProp name="HTTPSampler.port">${__P(wasteMovementExternalApiPort)}</stringProp>
           <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
-          <stringProp name="HTTPSampler.path">/movements/receive</stringProp>
+          <stringProp name="HTTPSampler.path">${__P(wasteMovementExternalApiBasePath)}/movements/receive</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
           <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
@@ -371,6 +416,14 @@
               </elementProp>
             </collectionProp>
           </HeaderManager>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert Waste Tracking ID Count" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+            <stringProp name="filename">scripts/logging/x.groovy</stringProp>
+            <stringProp name="script"></stringProp>
+          </JSR223Assertion>
           <hashTree/>
           <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert Create Response Code was Successful" enabled="true">
             <collectionProp name="Asserion.test_strings">
@@ -412,10 +465,11 @@
           <stringProp name="HTTPSampler.embedded_url_re">.*</stringProp>
           <intProp name="HTTPSampler.connect_timeout">60000</intProp>
           <intProp name="HTTPSampler.response_timeout">60000</intProp>
-          <stringProp name="HTTPSampler.domain">waste-movement-external-api.api.${__P(environment)}.cdp-int.defra.cloud</stringProp>
-          <stringProp name="HTTPSampler.protocol">https</stringProp>
+          <stringProp name="HTTPSampler.domain">${__P(wasteMovementExternalApiDomain)}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${__P(wasteMovementExternalApiProtocol)}</stringProp>
+          <stringProp name="HTTPSampler.port">${__P(wasteMovementExternalApiPort)}</stringProp>
           <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
-          <stringProp name="HTTPSampler.path">/movements/${wasteTrackingId}/receive</stringProp>
+          <stringProp name="HTTPSampler.path">${__P(wasteMovementExternalApiBasePath)}/movements/${wasteTrackingId}/receive</stringProp>
           <stringProp name="HTTPSampler.method">PUT</stringProp>
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
           <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
@@ -443,6 +497,14 @@
               </elementProp>
             </collectionProp>
           </HeaderManager>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert Waste Tracking ID Count" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+            <stringProp name="filename">scripts/logging/x.groovy</stringProp>
+            <stringProp name="script"></stringProp>
+          </JSR223Assertion>
           <hashTree/>
           <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert Update Response Code was Successful" enabled="true">
             <collectionProp name="Asserion.test_strings">

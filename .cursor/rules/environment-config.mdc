@@ -73,7 +73,7 @@ ENVIRONMENT=dev PROFILE=external-api CI=false ./entrypoint.sh
 ```
 
 ## Required Environment Variables
-- `ENVIRONMENT`: Target environment (dev, test, perf-test, prod)
+- `ENVIRONMENT`: Target environment (dev, test, perf-test, prod, local). Use `local` for local development; URLs resolve to localhost and OAuth is skipped.
 - `PROFILE`: Test profile – one of:
   - `external-api` (all create/update public API JMXs)
   - `bulk-upload` (all bulk create/update backend JMXs)
@@ -86,6 +86,8 @@ ENVIRONMENT=dev PROFILE=external-api CI=false ./entrypoint.sh
 - `API_CODE`: API code used by the OAuth2 access token script
 - `SERVICE_AUTH_PASSWORD_WASTE_ORGANISATION_BACKEND`: Password used to derive backend Basic auth credentials for bulk tests
 - `CDP_API_KEY`: API key used by bulk backend tests (`x-api-key` header)
+
+Bulk backend URL (domain, protocol, port) is derived from `ENVIRONMENT` and `CI` by `scripts/config/configure_waste_movement_backend_url.groovy` – no separate env vars.
 
 ### Optional Environment Variables
 - `HTTP_PROXY`: HTTP proxy URL (e.g. `http://proxy.example:3128`); if set, `entrypoint.sh` configures JMeter proxy host/port.

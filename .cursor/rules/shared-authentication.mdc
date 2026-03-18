@@ -12,22 +12,23 @@ This repository primarily uses a shared OAuth2 authentication approach for the p
 ## Implementation
 
 ### Core Components (Public API Tests)
-- **`scripts/get_accessToken.groovy`** - Main OAuth2 authentication script that handles token management
+- **`scripts/auth/get_accessToken.groovy`** - Main OAuth2 authentication script. When `ENVIRONMENT=local`, skips OAuth and uses a placeholder token (no Cognito call).
 - **`local-entrypoint.sh`** - Local development script that runs all JMX files with shared auth
 - **JMeter Properties** - Uses `resultcollector.action_if_file_exists=APPEND` for result consolidation
 
 ### How It Works (Public API Tests)
-1. **First JMX file** - Authenticates and stores token in global properties
-2. **Subsequent JMX files** - Reuse the cached token from global properties
-3. **Result consolidation** - All results are appended to a single `results.jtl` file
-4. **Single report** - One consolidated report is generated at the end
+1. **ENVIRONMENT=local** - Skips OAuth; sets placeholder token. No Cognito credentials required.
+2. **ENVIRONMENT≠local** - First JMX file authenticates and stores token in global properties
+3. **Subsequent JMX files** - Reuse the cached token from global properties
+4. **Result consolidation** - All results are appended to a single `results.jtl` file
+5. **Single report** - One consolidated report is generated at the end
 
 ### JMX File Requirements (Public API Tests)
 Each create/update public API JMX file must include:
 ```xml
 <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Get Access Token" enabled="true">
   <stringProp name="scriptLanguage">groovy</stringProp>
-  <stringProp name="filename">scripts/get_accessToken.groovy</stringProp>
+  <stringProp name="filename">scripts/auth/get_accessToken.groovy</stringProp>
 </JSR223PreProcessor>
 ```
 
@@ -59,7 +60,7 @@ scenarios/
     └── spike-test.jmx
 
 scripts/
-├── get_accessToken.groovy
+├── auth/get_accessToken.groovy
 ├── create_waste_movement_payload.groovy
 └── update_waste_movement_payload.groovy
 
