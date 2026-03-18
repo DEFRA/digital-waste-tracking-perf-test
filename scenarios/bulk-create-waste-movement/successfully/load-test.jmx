@@ -99,6 +99,10 @@
                 <stringProp name="Header.name">Accept-Encoding</stringProp>
                 <stringProp name="Header.value">identity</stringProp>
               </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">x-cdp-request-id</stringProp>
+                <stringProp name="Header.value">${__UUID()}</stringProp>
+              </elementProp>
             </collectionProp>
           </HeaderManager>
           <hashTree/>
