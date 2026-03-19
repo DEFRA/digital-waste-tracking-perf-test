@@ -23,6 +23,7 @@ alwaysApply: true
 - `scripts/payloads/update_waste_movement_payload.groovy` - Dynamic payload generation for update operations (sets `${putPayload}`)
 - `scripts/payloads/bulk_create_waste_movement_payload.groovy` - Dynamic payload generation for bulk create operations (sets `${bulkPostPayload}`)
 - `scripts/payloads/bulk_update_waste_movement_payload.groovy` - Dynamic payload generation for bulk update operations (sets `${bulkPutPayload}`)
+- `scripts/logging/after-response-log-hook.groovy` - Logs 4xx/5xx request/response (when `DEBUG=true`); runs when the response is returned, before assertions
 - `local-entrypoint.sh` - Local development script with shared authentication
 - `entrypoint.sh` - Docker container entry point
 - `Dockerfile` - Container configuration

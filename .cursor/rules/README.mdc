@@ -76,6 +76,7 @@ This directory contains comprehensive rules for LLMs working on this performance
 - **Authentication**: 
   - Public API shared OAuth2: `scripts/get_accessToken.groovy`
   - Bulk backend auth: `scripts/auth/get_waste_organisation_backend_auth.groovy`
+- **Logging**: `scripts/logging/after-response-log-hook.groovy` (runs when response is returned, before assertions; logs 4xx/5xx when `DEBUG=true`)
 - **Test Execution**: `./entrypoint.sh` (uses `env.sh` for configuration and `PROFILE` to select scenarios)
 - **Key Documentation**: `README.md`, `.cursor/rules/*.mdc`
 - **Focus Areas**: Load testing (50 users), Stress testing (100 users), Spike testing (3-phase: 10→75→10 users)

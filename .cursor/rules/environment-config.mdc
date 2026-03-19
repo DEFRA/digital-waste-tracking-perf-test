@@ -91,7 +91,7 @@ Bulk backend URL (domain, protocol, port) is derived from `ENVIRONMENT` and `CI`
 
 ### Optional Environment Variables
 - `HTTP_PROXY`: HTTP proxy URL (e.g. `http://proxy.example:3128`); if set, `entrypoint.sh` configures JMeter proxy host/port.
-- `DEBUG`: `"true"` / `"false"` string passed as `-Jdebug` to JMeter to control extra logging.
+- `DEBUG`: `"true"` / `"false"` string passed as `-Jdebug` to JMeter. When `"true"`, `scripts/logging/after-response-log-hook.groovy` logs full request/response for 4xx/5xx responses (runs when response is returned, before assertions) to JMeter log and console.
 - `RUN_ID`: Identifier logged when `CI=true` to correlate runs in the CDP portal.
 - `RESULTS_OUTPUT_S3_PATH`: S3 URI where CI runs upload JMeter results and HTML reports.
 - `S3_ENDPOINT`: Endpoint URL for S3-compatible storage (e.g. LocalStack in local testing).

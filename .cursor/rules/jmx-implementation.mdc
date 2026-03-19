@@ -182,6 +182,7 @@ URL components are derived by `scripts/config/configure_waste_movement_external_
 
 2. **Thread Group Level**:
    - HTTP Samplers with HTTP Arguments configuration
+   - JSR223 PostProcessor for `scripts/logging/after-response-log-hook.groovy` as first child of each HTTP Sampler (runs when response is returned, before assertions; logs 4xx/5xx when `DEBUG=true`)
    - HeaderManager for Content-Type and Authorization
    - ResponseAssertion for success validation
    - DurationAssertion for response time thresholds
@@ -213,6 +214,7 @@ URL components are derived by `scripts/config/configure_waste_movement_external_
 - Use `scripts/config/configure_waste_movement_backend_url.groovy` for bulk backend URL (bulk tests)
 - Use `scripts/create_waste_movement_payload.groovy` for create operations
 - Use `scripts/update_waste_movement_payload.groovy` for update operations
+- Use `scripts/logging/after-response-log-hook.groovy` as JSR223 PostProcessor (first after each HTTP Sampler; runs when response is returned, before assertions; logs 4xx/5xx when `DEBUG=true`)
 
 ### Variable Usage
 - Use `${postPayload}` for POST/create operations
@@ -282,6 +284,7 @@ URL components are derived by `scripts/config/configure_waste_movement_external_
 
 ### PostProcessor Names
 - **Data Extraction**: `"Extract [Data Type]"`
+- **Debug Logging**: `after-response-log-hook.groovy` (runs when response is returned, before assertions)
 - **Examples**: `"Extract Waste Tracking ID"`
 
 ### Naming Principles
