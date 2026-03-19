@@ -67,12 +67,20 @@ This directory contains comprehensive rules for LLMs working on this performance
 
 ## Quick Reference
 
-- **Test Organization**: `scenarios/create-waste-movement/successfully/`, `scenarios/update-waste-movement/successfully/`
-- **Payload Scripts**: `scripts/create_waste_movement_payload.groovy`, `scripts/update_waste_movement_payload.groovy`
-- **Authentication**: `scripts/get_accessToken.groovy` (shared across all tests)
-- **Test Execution**: `./entrypoint.sh` (uses `env.sh` for configuration)
-- **Key Documentation**: `TEST_ORGANIZATION.md`, `PAYLOAD_STRUCTURE.md`
-- **Focus Areas**: Load testing (10-50 users), Stress testing (25-50+ users), Spike testing (3-phase: 5→50→5 users)
+- **Test Organization**: 
+  - Public API tests: `scenarios/create-waste-movement/successfully/`, `scenarios/update-waste-movement/successfully/`
+  - Bulk backend tests: `scenarios/bulk-create-waste-movement/successfully/`, `scenarios/bulk-update-waste-movement/successfully/`
+- **Payload Scripts**: 
+  - Public API: `scripts/create_waste_movement_payload.groovy`, `scripts/update_waste_movement_payload.groovy`
+  - Bulk: `scripts/payloads/bulk_create_waste_movement_payload.groovy`, `scripts/payloads/bulk_update_waste_movement_payload.groovy`
+- **Authentication**: 
+  - Public API shared OAuth2: `scripts/get_accessToken.groovy`
+  - Bulk backend auth: `scripts/auth/get_waste_organisation_backend_auth.groovy`
+- **Logging**: `scripts/logging/after-response-log-hook.groovy` (runs when response is returned, before assertions; logs 4xx/5xx when `DEBUG=true`)
+- **Public API local headers**: `scripts/headers/remove_cdp_request_id_when_not_local.groovy` (removes x-cdp-request-id when `ENVIRONMENT≠local`)
+- **Test Execution**: `./entrypoint.sh` (uses `env.sh` for configuration and `PROFILE` to select scenarios)
+- **Key Documentation**: `README.md`, `.cursor/rules/*.mdc`
+- **Focus Areas**: Load testing (50 users), Stress testing (100 users), Spike testing (3-phase: 10→75→10 users)
 
 ## Usage
 

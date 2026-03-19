@@ -7,10 +7,8 @@ alwaysApply: true
 # Documentation Standards
 
 ## Required Documentation
-- `README.md` - Repository overview and setup instructions
-- `TEST_ORGANIZATION.md` - Test structure and usage guide
-- `PAYLOAD_STRUCTURE.md` - Payload file documentation
-- `.cursor/rules/` - LLM interaction rules
+- `README.md` - Repository overview, setup instructions, test execution, and high-level test organization
+- `.cursor/rules/` - LLM interaction rules and implementation guidelines
 
 ## Documentation Updates
 - Update documentation when adding new tests

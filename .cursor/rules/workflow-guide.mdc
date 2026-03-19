@@ -11,13 +11,20 @@ alwaysApply: true
 - Focus is on load, stress, and spike testing only
 - Functional testing is handled by a separate regression pack
 - Tests use Groovy scripts for dynamic payload generation
-- Uses shared authentication pattern across all JMX files
+- Uses a shared OAuth2 authentication pattern for public API tests, and a backend Basic-auth + API key pattern for bulk backend tests
 
 ## Key Files to Understand
 - `scenarios/` - Contains organized JMX test files by operation and test type
-- `scripts/get_accessToken.groovy` - Shared authentication script for token management
-- `scripts/create_waste_movement_payload.groovy` - Dynamic payload generation for create operations (sets `${postPayload}`)
-- `scripts/update_waste_movement_payload.groovy` - Dynamic payload generation for update operations (sets `${putPayload}`)
+- `scripts/auth/get_accessToken.groovy` - Shared OAuth2 authentication (skipped when ENVIRONMENT=local)
+- `scripts/auth/get_waste_organisation_backend_auth.groovy` - Backend authentication script for bulk tests
+- `scripts/config/configure_waste_movement_external_api_url.groovy` - Derives public API URL from ENVIRONMENT (localhost:3001 local; waste-movement-external-api.api.${env}.cdp-int.defra.cloud otherwise)
+- `scripts/config/configure_waste_movement_backend_url.groovy` - Derives bulk backend URL from ENVIRONMENT and CI
+- `scripts/payloads/create_waste_movement_payload.groovy` - Dynamic payload generation for create operations (sets `${postPayload}`)
+- `scripts/payloads/update_waste_movement_payload.groovy` - Dynamic payload generation for update operations (sets `${putPayload}`)
+- `scripts/payloads/bulk_create_waste_movement_payload.groovy` - Dynamic payload generation for bulk create operations (sets `${bulkPostPayload}`)
+- `scripts/payloads/bulk_update_waste_movement_payload.groovy` - Dynamic payload generation for bulk update operations (sets `${bulkPutPayload}`)
+- `scripts/logging/after-response-log-hook.groovy` - Logs 4xx/5xx request/response (when `DEBUG=true`); runs when the response is returned, before assertions
+- `scripts/headers/remove_cdp_request_id_when_not_local.groovy` - Removes x-cdp-request-id header when ENVIRONMENT≠local (public API tests only)
 - `local-entrypoint.sh` - Local development script with shared authentication
 - `entrypoint.sh` - Docker container entry point
 - `Dockerfile` - Container configuration
@@ -25,6 +32,8 @@ alwaysApply: true
 ## Test Organization
 - `scenarios/create-waste-movement/successfully/` - Create operation tests
 - `scenarios/update-waste-movement/successfully/` - Update operation tests (two-step workflow: create + update)
+- `scenarios/bulk-create-waste-movement/successfully/` - Bulk create operation tests
+- `scenarios/bulk-update-waste-movement/successfully/` - Bulk update (create + update) operation tests
 - Each operation has: `baseline-test.jmx`, `load-test.jmx`, `spike-test.jmx`, `stress-test.jmx`
 
 ## Adding New Tests
@@ -68,19 +77,19 @@ alwaysApply: true
 ## Running JMeter Tests
 
 ### Using the Entrypoint Script
-1. **Set Environment Variables**: Ensure all required environment variables are set in `env.sh`
-2. **Run Single Test**: `./entrypoint.sh` (uses `TEST_SCENARIO` from `env.sh`)
-3. **Run Individual Tests**: Set specific JMX file path in `TEST_SCENARIO` for CDP execution
-4. **Avoid Full Suite**: Don't set `TEST_SCENARIO=all` in CDP due to 2-hour runtime limit
-5. **CI Mode**: Set `CI=true` in `env.sh` for CDP Platform execution
+1. **Set Environment Variables**: Ensure all required environment variables are set in `env.sh`, including `ENVIRONMENT`, `PROFILE`, `CI`, and authentication-related values.
+2. **Run Profile Locally**: `./entrypoint.sh` (uses `PROFILE` from `env.sh` or the shell environment).
+   - `PROFILE=external-api` runs all create/update public API tests.
+   - `PROFILE=bulk-upload` runs all bulk backend tests.
+   - `PROFILE=all` runs every JMX under `scenarios/`.
+3. **Run Individual Test**: Set `PROFILE` to a specific JMX path under `scenarios/` (e.g. `bulk-update-waste-movement/successfully/baseline-test.jmx`) and run `./entrypoint.sh`.
+4. **CI Mode**: Set `CI=true` (and `RESULTS_OUTPUT_S3_PATH` / `S3_ENDPOINT`) so `entrypoint.sh` publishes results for CDP Platform.
 
 ### Required Environment Variables
-- `ENVIRONMENT`: Target environment (dev, test, perf-test, prod)
+- `ENVIRONMENT`: Target environment (dev, test, perf-test, prod, or `local` for local dev – skips OAuth, uses localhost URLs)
 - `TEST_SCENARIO`: JMX file path or "all" for all tests
 - `CI`: "true" for CDP Platform, "false" for local development
-- `COGNITO_CLIENT_ID`: OAuth2 client ID
-- `COGNITO_CLIENT_SECRET`: OAuth2 client secret
-- `COGNITO_OAUTH_BASE_URL`: OAuth2 base URL
+- `COGNITO_CLIENT_ID`, `COGNITO_CLIENT_SECRET`, `COGNITO_OAUTH_BASE_URL`: Required for public API tests when ENVIRONMENT≠local; optional for local (OAuth skipped)
 - `ORGANISATION_API_ID`: Organization API ID
 
 ### Test Execution Flow
@@ -113,10 +122,10 @@ alwaysApply: true
 ## Common Tasks
 - Adding new performance tests
 - Modifying existing test configurations
-- Updating Groovy payload scripts for API changes
+- Updating Groovy payload scripts for API changes (including bulk payload scripts)
 - Organizing tests by intensity level
 - Updating documentation
-- Managing shared authentication across multiple JMX files
+- Managing authentication across multiple JMX files (public OAuth2 and bulk backend patterns)
 
 ## What NOT to Do
 - Don't add functional testing (handled by regression pack)

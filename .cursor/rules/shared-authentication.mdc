@@ -7,27 +7,28 @@ alwaysApply: true
 # Shared Authentication Rules
 
 ## Overview
-This repository uses a shared authentication approach to authenticate once and reuse the token across all JMX files in a test run. This improves performance and reduces authentication overhead.
+This repository primarily uses a shared OAuth2 authentication approach for the public API tests, and a separate backend authentication pattern for the bulk backend tests. The shared OAuth2 pattern authenticates once and reuses the token across all relevant JMX files in a test run, while the backend tests use Basic auth and API keys for the protected backend endpoint.
 
 ## Implementation
 
-### Core Components
-- **`scripts/get_accessToken.groovy`** - Main authentication script that handles token management
+### Core Components (Public API Tests)
+- **`scripts/auth/get_accessToken.groovy`** - Main OAuth2 authentication script. When `ENVIRONMENT=local`, skips OAuth and uses a placeholder token (no Cognito call).
 - **`local-entrypoint.sh`** - Local development script that runs all JMX files with shared auth
 - **JMeter Properties** - Uses `resultcollector.action_if_file_exists=APPEND` for result consolidation
 
-### How It Works
-1. **First JMX file** - Authenticates and stores token in global properties
-2. **Subsequent JMX files** - Reuse the cached token from global properties
-3. **Result consolidation** - All results are appended to a single `results.jtl` file
-4. **Single report** - One consolidated report is generated at the end
+### How It Works (Public API Tests)
+1. **ENVIRONMENT=local** - Skips OAuth; sets placeholder token. No Cognito credentials required.
+2. **ENVIRONMENT≠local** - First JMX file authenticates and stores token in global properties
+3. **Subsequent JMX files** - Reuse the cached token from global properties
+4. **Result consolidation** - All results are appended to a single `results.jtl` file
+5. **Single report** - One consolidated report is generated at the end
 
-### JMX File Requirements
-Each JMX file must include:
+### JMX File Requirements (Public API Tests)
+Each create/update public API JMX file must include:
 ```xml
 <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Get Access Token" enabled="true">
   <stringProp name="scriptLanguage">groovy</stringProp>
-  <stringProp name="filename">scripts/get_accessToken.groovy</stringProp>
+  <stringProp name="filename">scripts/auth/get_accessToken.groovy</stringProp>
 </JSR223PreProcessor>
 ```
 
@@ -37,14 +38,14 @@ Each JMX file must include:
 ./local-entrypoint.sh
 ```
 
-## Benefits
-- ✅ **Single Authentication** - Authenticate once for entire test suite
-- ✅ **Faster Execution** - No repeated authentication overhead
+## Benefits (Public API Shared Auth)
+- ✅ **Single Authentication** - Authenticate once for entire public-API test run
+- ✅ **Faster Execution** - No repeated OAuth2 authentication overhead
 - ✅ **Consolidated Results** - All tests in one report
-- ✅ **Easy Maintenance** - Add new JMX files without auth changes
-- ✅ **Token Sharing** - Automatic token reuse across all tests
+- ✅ **Easy Maintenance** - Add new JMX files without OAuth changes
+- ✅ **Token Sharing** - Automatic token reuse across all public-API tests
 
-## File Structure
+## File Structure (Public API Tests)
 ```
 scenarios/
 ├── create-waste-movement/successfully/
@@ -59,18 +60,36 @@ scenarios/
     └── spike-test.jmx
 
 scripts/
-├── get_accessToken.groovy
+├── auth/get_accessToken.groovy
 ├── create_waste_movement_payload.groovy
 └── update_waste_movement_payload.groovy
 
 local-entrypoint.sh
 ```
 
+## Backend Authentication Pattern (Bulk Tests)
+
+Bulk create/update tests use a backend authentication approach with Basic auth and an API key instead of OAuth2:
+
+- **Script**: `scripts/auth/get_waste_organisation_backend_auth.groovy` populates backend credentials (e.g. `base64EncodedCredentialWasteOrganisationBackend`).
+- **Headers**: Bulk JMX files add:
+  - `Authorization: Basic ${__P(base64EncodedCredentialWasteOrganisationBackend)}`
+  - `x-api-key: ${__P(cdpApiKey)}`
+  - `Accept-Encoding: identity`
+  - `x-cdp-request-id: ${__UUID()}` (always sent)
+
+**Public API (non-bulk)**: Add `x-cdp-request-id: ${__UUID()}` in HeaderManager and use `scripts/headers/remove_cdp_request_id_when_not_local.groovy` PreProcessor to remove it when `ENVIRONMENT≠local` (header is always added, then removed for non-local).
+- **Scope**: This pattern is used in:
+  - `scenarios/bulk-create-waste-movement/successfully/*.jmx`
+  - `scenarios/bulk-update-waste-movement/successfully/*.jmx`
+
+Both authentication patterns are valid and coexist; use the OAuth2 shared token pattern for public API tests and the backend auth pattern for bulk backend tests.
+
 ## When Adding New Tests
 1. Create JMX file in appropriate `scenarios/` subdirectory
-2. Include the `get_accessToken.groovy` JSR223PreProcessor
-3. No need to add individual authentication logic
-4. Test will automatically use shared token
+2. For public API tests, include the `get_accessToken.groovy` JSR223PreProcessor and use the shared OAuth2 token
+3. For bulk backend tests, include the `get_waste_organisation_backend_auth.groovy` JSR223PreProcessor and use Basic auth + API key headers
+4. Avoid duplicating authentication logic inside individual samplers
 
 ## Troubleshooting
 - **Token not found**: Ensure `get_accessToken.groovy` is included in JMX file

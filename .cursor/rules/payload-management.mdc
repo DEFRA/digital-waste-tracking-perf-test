@@ -50,8 +50,10 @@ alwaysApply: true
 - Ensure proper error handling in Groovy scripts
 
 ## Groovy Script Patterns
-- `create_waste_movement_payload.groovy` - Sets `postPayload` variable for POST operations
-- `update_waste_movement_payload.groovy` - Sets `putPayload` variable for PUT operations
+- `create_waste_movement_payload.groovy` - Sets `postPayload` variable for create POST operations
+- `update_waste_movement_payload.groovy` - Sets `putPayload` variable for update PUT operations
+- `payloads/bulk_create_waste_movement_payload.groovy` - Sets `bulkPostPayload` variable for bulk create POST operations
+- `payloads/bulk_update_waste_movement_payload.groovy` - Sets `bulkPutPayload` variable for bulk update PUT operations
 - Scripts should use `vars.put("variableName", value)` to make variables available to JMeter
 - Scripts should access test properties via `props.get("propertyName")` for environment configuration
 - Scripts should access test variables via `vars.get("variableName")` for test-specific data

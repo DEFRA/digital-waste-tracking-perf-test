@@ -6,6 +6,14 @@ import org.apache.jmeter.protocol.http.control.Header
 import org.apache.jmeter.protocol.http.util.HTTPArgument
 import java.util.Base64
 
+// Skip OAuth for local environment - no token required
+String environment = props.get("environment") ?: "local"
+if (environment == "local") {
+    props.put("global_access_token", "local")
+    log.info("Environment is local - skipping OAuth, using placeholder token")
+    return
+}
+
 // Check if access token already exists in global properties
 Long accessTokenCreatedAt = Long.parseLong(props.get("global_access_token_created_at") ?: "0")
 Long now = System.currentTimeMillis()
@@ -95,3 +103,4 @@ if (props.get("global_access_token") == null || now > accessTokenExpiresAt) {
 } else {
     log.info("Reusing existing global access token")
 }
+

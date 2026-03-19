@@ -17,19 +17,19 @@ Spike tests simulate sudden increases in load to test system behavior under stre
 3. **Phase 3 - Recovery**: Test system recovery to normal load
 
 ### Phase Configuration
-- **Phase 1 - Low Load**: 5 users, 30s ramp-up, 300s duration
-- **Phase 2 - High Load**: 50 users, 5s ramp-up, 60s duration
-- **Phase 3 - Recovery**: 5 users, 10s ramp-up, 300s duration
-- **Total Duration**: ~11 minutes (5min + 1min + 5min)
+- **Phase 1 - Low Load**: 10 users, 30s ramp-up, 180s duration
+- **Phase 2 - High Load**: 75 users, 5s ramp-up, 180s duration
+- **Phase 3 - Recovery**: 10 users, 10s ramp-up, 180s duration
+- **Total Duration**: ~9 minutes (3min + 3min + 3min)
 
 ## ThreadGroup Configuration
 
 ### Phase 1 - Low Load
 ```xml
 <ThreadGroup testname="Spike Phase 1 - Low Load">
-  <intProp name="ThreadGroup.num_threads">5</intProp>
+ <intProp name="ThreadGroup.num_threads">10</intProp>
   <intProp name="ThreadGroup.ramp_time">30</intProp>
-  <longProp name="ThreadGroup.duration">300</longProp>
+ <longProp name="ThreadGroup.duration">180</longProp>
   <boolProp name="ThreadGroup.scheduler">true</boolProp>
 </ThreadGroup>
 ```
@@ -37,9 +37,9 @@ Spike tests simulate sudden increases in load to test system behavior under stre
 ### Phase 2 - High Load
 ```xml
 <ThreadGroup testname="Spike Phase 2 - High Load">
-  <intProp name="ThreadGroup.num_threads">50</intProp>
+ <intProp name="ThreadGroup.num_threads">75</intProp>
   <intProp name="ThreadGroup.ramp_time">5</intProp>
-  <longProp name="ThreadGroup.duration">60</longProp>
+ <longProp name="ThreadGroup.duration">180</longProp>
   <boolProp name="ThreadGroup.scheduler">true</boolProp>
 </ThreadGroup>
 ```
@@ -47,9 +47,9 @@ Spike tests simulate sudden increases in load to test system behavior under stre
 ### Phase 3 - Recovery
 ```xml
 <ThreadGroup testname="Spike Phase 3 - Recovery">
-  <intProp name="ThreadGroup.num_threads">5</intProp>
+ <intProp name="ThreadGroup.num_threads">10</intProp>
   <intProp name="ThreadGroup.ramp_time">10</intProp>
-  <longProp name="ThreadGroup.duration">300</longProp>
+ <longProp name="ThreadGroup.duration">180</longProp>
   <boolProp name="ThreadGroup.scheduler">true</boolProp>
 </ThreadGroup>
 ```
@@ -58,9 +58,9 @@ Spike tests simulate sudden increases in load to test system behavior under stre
 
 ### ThreadGroup Properties
 - **Scheduler**: `ThreadGroup.scheduler=true` - Enable duration-based execution
-- **Duration**: `ThreadGroup.duration=300/60/300` - 5min/1min/5min per phase
+- **Duration**: `ThreadGroup.duration=180/180/180` - 3min/3min/3min per phase
 - **Ramp-up**: Gradual user increase (30s for Phase 1, 5s for Phase 2, 10s for Phase 3)
-- **User Count**: 5 → 50 → 5 users across phases
+- **User Count**: 10 → 75 → 10 users across phases
 - **Error Handling**: `ThreadGroup.on_sample_error=continue`
 - **User Persistence**: `ThreadGroup.same_user_on_next_iteration=true`
 

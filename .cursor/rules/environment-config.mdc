@@ -10,10 +10,9 @@ alwaysApply: true
 This repository uses a **command-line properties approach** for JMeter configuration, which provides maximum flexibility and clear separation between configuration and business logic.
 
 ## File Structure
-- `env.sh` - Local development environment variables (gitignored)
+- `env.sh` - Local development and CI environment variables (gitignored)
 - `env.sh.template` - Template showing required environment variables
-- `local-entrypoint.sh` - Local development script with all JMeter properties
-- `entrypoint.sh` - Production script for CI/CD environments
+- `entrypoint.sh` - Script for local and CI/CD execution
 - `.gitignore` - Excludes sensitive environment files
 
 ## Environment Variable Flow
@@ -62,8 +61,8 @@ jmeter -n -t scenarios/create-waste-movement/successfully/baseline-test.jmx \
 
 ### Using Entrypoint Script
 ```bash
-# Entrypoint automatically loads env.sh if present
-ENVIRONMENT=dev TEST_SCENARIO=create-waste-movement/successfully/baseline-test ./entrypoint.sh
+# Entrypoint automatically loads env.sh if present and uses PROFILE to select tests
+ENVIRONMENT=dev PROFILE=external-api CI=false ./entrypoint.sh
 ```
 
 ### CI/CD Environment
@@ -74,20 +73,37 @@ ENVIRONMENT=dev TEST_SCENARIO=create-waste-movement/successfully/baseline-test .
 ```
 
 ## Required Environment Variables
-- `ENVIRONMENT`: Target environment (dev, test, perf-test, prod)
-- `TEST_SCENARIO`: JMX file path or "all" for all tests
-- `CI`: "true" for CDP Platform, "false" for local development
-- `COGNITO_CLIENT_ID`: OAuth2 client ID
-- `COGNITO_CLIENT_SECRET`: OAuth2 client secret
-- `COGNITO_OAUTH_BASE_URL`: OAuth2 base URL
-- `ORGANISATION_API_ID`: Organization API ID
+- `ENVIRONMENT`: Target environment (dev, test, perf-test, prod, local). Use `local` for local development; URLs resolve to localhost and OAuth is skipped.
+- `PROFILE`: Test profile – one of:
+  - `external-api` (all create/update public API JMXs)
+  - `bulk-upload` (all bulk create/update backend JMXs)
+  - `all` (all JMXs under `scenarios/`)
+  - or a relative JMX path under `scenarios/` (e.g. `bulk-update-waste-movement/successfully/baseline-test.jmx`)
+- `CI`: `"true"` for CDP Platform runs, `"false"` for local development
+- `COGNITO_CLIENT_ID`: OAuth2 client ID (public API tests)
+- `COGNITO_CLIENT_SECRET`: OAuth2 client secret (public API tests)
+- `COGNITO_OAUTH_BASE_URL`: OAuth2 base URL (public API tests)
+- `API_CODE`: API code used by the OAuth2 access token script
+- `SERVICE_AUTH_PASSWORD_WASTE_ORGANISATION_BACKEND`: Password used to derive backend Basic auth credentials for bulk tests
+- `CDP_API_KEY`: API key used by bulk backend tests (`x-api-key` header)
+
+Bulk backend URL (domain, protocol, port) is derived from `ENVIRONMENT` and `CI` by `scripts/config/configure_waste_movement_backend_url.groovy` – no separate env vars.
+
+### Optional Environment Variables
+- `HTTP_PROXY`: HTTP proxy URL (e.g. `http://proxy.example:3128`); if set, `entrypoint.sh` configures JMeter proxy host/port.
+- `DEBUG`: `"true"` / `"false"` string passed as `-Jdebug` to JMeter. When `"true"`, `scripts/logging/after-response-log-hook.groovy` logs full request/response for 4xx/5xx responses (runs when response is returned, before assertions) to JMeter log and console.
+- `RUN_ID`: Identifier logged when `CI=true` to correlate runs in the CDP portal.
+- `RESULTS_OUTPUT_S3_PATH`: S3 URI where CI runs upload JMeter results and HTML reports.
+- `S3_ENDPOINT`: Endpoint URL for S3-compatible storage (e.g. LocalStack in local testing).
 
 ## Test Execution Flow
-1. **Cleanup**: Removes previous test results from `reports/`, `logs/`, `results/` directories
-2. **Authentication**: Gets OAuth2 token using shared authentication script
-3. **Test Execution**: Runs JMX files with proper environment variables
-4. **Report Generation**: Creates HTML report from CSV results
-5. **Output**: Opens report in browser (local) or uploads to S3 (CI)
+1. **Cleanup**: Removes previous test results from `reports/`, `logs/`, `results/` directories.
+2. **Authentication Configuration**: Passes OAuth2 and backend auth properties (`apiCode`, `clientId`, `clientSecret`, `authBaseUrl`, `serviceAuthPasswordWasteOrganisationBackend`, `cdpApiKey`) into JMeter via `-J` properties.
+3. **Test Selection**: Uses `PROFILE` to determine which JMX files under `scenarios/` to run and executes them in sequence, appending all samples into a single `results/results.jtl`.
+4. **Report Generation**: Generates a consolidated HTML report from the combined JTL into `reports/`.
+5. **Output / Publishing**:
+   - **Local (`CI=false`)**: Prints the report path and opens it in a browser when possible.
+   - **CI (`CI=true`)**: Uploads the JTL, logs, and HTML report directory to `RESULTS_OUTPUT_S3_PATH` using the configured `S3_ENDPOINT`.
 
 ## Directory Structure
 - `scenarios/`: JMX test files organized by operation and test type

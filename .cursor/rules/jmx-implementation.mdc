@@ -72,10 +72,10 @@ alwaysApply: true
 - **Example**: 1 user, 1 loop = single request for functional validation
 
 ### Spike Test Pattern (Multi-Phase Execution)
-- **Phase 1 - Low Load**: 5 users, 30s ramp-up, 300s duration
-- **Phase 2 - High Load**: 50 users, 5s ramp-up, 60s duration  
-- **Phase 3 - Recovery**: 5 users, 10s ramp-up, 300s duration
-- **Total Duration**: ~11 minutes (5min + 1min + 5min)
+- **Phase 1 - Low Load**: 10 users, 30s ramp-up, 180s duration
+- **Phase 2 - High Load**: 75 users, 5s ramp-up, 180s duration  
+- **Phase 3 - Recovery**: 10 users, 10s ramp-up, 180s duration
+- **Total Duration**: ~9 minutes (3min + 3min + 3min)
 - **Purpose**: Test system behavior under sudden load spikes and recovery
 
 ### Thread Group Properties
@@ -140,12 +140,14 @@ alwaysApply: true
 
 ## HTTP Request Configuration
 
-### Standard HTTP Sampler Pattern
+### Standard HTTP Sampler Pattern (Public API - Create/Update)
+URL components are derived by `scripts/config/configure_waste_movement_external_api_url.groovy` from ENVIRONMENT. Use properties:
 ```xml
 <HTTPSamplerProxy testname="Create Waste Movement">
-  <stringProp name="HTTPSampler.domain">waste-movement-external-api.api.${__P(environment)}.cdp-int.defra.cloud</stringProp>
-  <stringProp name="HTTPSampler.protocol">https</stringProp>
-  <stringProp name="HTTPSampler.path">/movements/receive</stringProp>
+  <stringProp name="HTTPSampler.domain">${__P(wasteMovementExternalApiDomain)}</stringProp>
+  <stringProp name="HTTPSampler.protocol">${__P(wasteMovementExternalApiProtocol)}</stringProp>
+  <stringProp name="HTTPSampler.port">${__P(wasteMovementExternalApiPort)}</stringProp>
+  <stringProp name="HTTPSampler.path">${__P(wasteMovementExternalApiBasePath)}/movements/receive</stringProp>
   <stringProp name="HTTPSampler.method">POST</stringProp>
   <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
   <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
@@ -167,6 +169,7 @@ alwaysApply: true
 - **No Encoding**: Set `always_encode=false` and `use_equals=false` for JSON content
 - **Headers**: Use HeaderManager for Content-Type and Authorization headers
 - **Authorization**: Use `${__P(global_access_token)}` for shared authentication token
+- **x-cdp-request-id (public API, local only)**: Add `x-cdp-request-id: ${__UUID()}` in HeaderManager, plus JSR223 PreProcessor `scripts/headers/remove_cdp_request_id_when_not_local.groovy` (first child of sampler) to remove it when `ENVIRONMENT≠local`; header is always added then removed for non-local
 
 ## Standard JMX File Components
 
@@ -174,18 +177,21 @@ alwaysApply: true
 1. **Test Plan Level**:
    - User Defined Variables with `testType` parameter
    - JSR223PreProcessor for payload generation
-   - JSR223PreProcessor for shared authentication
+   - JSR223PreProcessor for shared authentication (public API) or backend auth (bulk)
+   - JSR223PreProcessor for URL configuration: `configure_waste_movement_external_api_url.groovy` (create/update) or `configure_waste_movement_backend_url.groovy` (bulk)
    - UniformRandomTimer for think time (500ms base + 1000ms range)
 
 2. **Thread Group Level**:
    - HTTP Samplers with HTTP Arguments configuration
-   - HeaderManager for Content-Type and Authorization
+   - JSR223 PostProcessor for `scripts/logging/after-response-log-hook.groovy` as first child of each HTTP Sampler (runs when response is returned, before assertions; logs 4xx/5xx when `DEBUG=true`)
+   - HeaderManager for Content-Type and Authorization (public API: add x-cdp-request-id with `remove_cdp_request_id_when_not_local.groovy` PreProcessor for local-only behaviour)
    - ResponseAssertion for success validation
    - DurationAssertion for response time thresholds
    - JSONPostProcessor for data extraction (when needed)
 
 3. **HTTP Sampler Configuration**:
-   - Use `${__P(environment)}` for domain configuration
+   - Public API (create/update): Use configure_waste_movement_external_api_url.groovy; reference `${__P(wasteMovementExternalApiDomain)}`, `${__P(wasteMovementExternalApiProtocol)}`, `${__P(wasteMovementExternalApiPort)}`, `${__P(wasteMovementExternalApiBasePath)}`
+   - Bulk API: Use configure_waste_movement_backend_url.groovy; reference `${__P(wasteMovementBackendDomain)}`, etc.
    - Set `postBodyRaw=false` for JSON payloads
    - Use HTTP Arguments with empty name for request body
    - Set `always_encode=false` and `use_equals=false`
@@ -199,14 +205,18 @@ alwaysApply: true
 
 ### Properties Usage
 - Use `${__P(propertyName)}` for all configurable values
-- Use `${__P(environment)}` for environment-specific URLs
+- URL properties are set by config scripts: `wasteMovementExternalApi*` (public API), `wasteMovementBackend*` (bulk)
 - Use `${__P(global_access_token)}` for shared authentication token
 
 ### External Scripts
 - Reference Groovy files with `filename` property
-- Use `scripts/get_accessToken.groovy` for authentication
+- Use `scripts/auth/get_accessToken.groovy` for authentication (skipped when ENVIRONMENT=local)
+- Use `scripts/config/configure_waste_movement_external_api_url.groovy` for public API URL (create/update tests)
+- Use `scripts/config/configure_waste_movement_backend_url.groovy` for bulk backend URL (bulk tests)
 - Use `scripts/create_waste_movement_payload.groovy` for create operations
 - Use `scripts/update_waste_movement_payload.groovy` for update operations
+- Use `scripts/logging/after-response-log-hook.groovy` as JSR223 PostProcessor (first after each HTTP Sampler; runs when response is returned, before assertions; logs 4xx/5xx when `DEBUG=true`)
+- Use `scripts/headers/remove_cdp_request_id_when_not_local.groovy` as JSR223 PreProcessor (first child of each HTTP Sampler) for public API tests – removes x-cdp-request-id when `ENVIRONMENT≠local`
 
 ### Variable Usage
 - Use `${postPayload}` for POST/create operations
@@ -276,6 +286,7 @@ alwaysApply: true
 
 ### PostProcessor Names
 - **Data Extraction**: `"Extract [Data Type]"`
+- **Debug Logging**: `after-response-log-hook.groovy` (runs when response is returned, before assertions)
 - **Examples**: `"Extract Waste Tracking ID"`
 
 ### Naming Principles

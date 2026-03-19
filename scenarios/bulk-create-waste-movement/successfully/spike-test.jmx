@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
   <hashTree>
-    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Create Waste Movement - Spike Test">
-      <stringProp name="TestPlan.comments">Spike test for Create Waste Movement operations</stringProp>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Bulk Create Waste Movement - Spike Test">
+      <stringProp name="TestPlan.comments">Spike test for Bulk Create Waste Movement operations</stringProp>
       <boolProp name="TestPlan.serialize_threadgroups">true</boolProp>
       <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
         <collectionProp name="Arguments.arguments">
@@ -11,37 +11,34 @@
             <stringProp name="Argument.value">Spike</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
+          <elementProp name="bulkMovementCount" elementType="Argument">
+            <stringProp name="Argument.name">bulkMovementCount</stringProp>
+            <stringProp name="Argument.value">250</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
         </collectionProp>
       </elementProp>
       <boolProp name="TestPlan.functional_mode">false</boolProp>
     </TestPlan>
     <hashTree>
-      <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Generate Create Waste Movement Payload">
+      <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Get Backend Auth">
         <stringProp name="scriptLanguage">groovy</stringProp>
-        <stringProp name="filename">scripts/payloads/create_waste_movement_payload.groovy</stringProp>
+        <stringProp name="filename">scripts/auth/get_waste_organisation_backend_auth.groovy</stringProp>
         <stringProp name="parameters"></stringProp>
         <stringProp name="cacheKey">false</stringProp>
         <stringProp name="script"></stringProp>
       </JSR223PreProcessor>
       <hashTree/>
-      <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Get Access Token" enabled="true">
+      <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Configure Waste Movement Backend URL">
         <stringProp name="scriptLanguage">groovy</stringProp>
-        <stringProp name="filename">scripts/auth/get_accessToken.groovy</stringProp>
-        <stringProp name="parameters"></stringProp>
-        <stringProp name="cacheKey">false</stringProp>
-        <stringProp name="script"></stringProp>
-      </JSR223PreProcessor>
-      <hashTree/>
-      <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Configure Waste Movement External API URL">
-        <stringProp name="scriptLanguage">groovy</stringProp>
-        <stringProp name="filename">scripts/config/configure_waste_movement_external_api_url.groovy</stringProp>
+        <stringProp name="filename">scripts/config/configure_waste_movement_backend_url.groovy</stringProp>
         <stringProp name="parameters"></stringProp>
         <stringProp name="cacheKey">false</stringProp>
         <stringProp name="script"></stringProp>
       </JSR223PreProcessor>
       <hashTree/>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Spike Phase 1 - Low Load">
-        <intProp name="ThreadGroup.num_threads">10</intProp>
+        <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">30</intProp>
         <longProp name="ThreadGroup.duration">180</longProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -53,33 +50,32 @@
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Waste Movement" enabled="true">
-          <stringProp name="HTTPSampler.embedded_url_re">.*</stringProp>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Bulk Create Waste Movement" enabled="true">
           <intProp name="HTTPSampler.connect_timeout">60000</intProp>
           <intProp name="HTTPSampler.response_timeout">60000</intProp>
-          <stringProp name="HTTPSampler.domain">${__P(wasteMovementExternalApiDomain)}</stringProp>
-          <stringProp name="HTTPSampler.protocol">${__P(wasteMovementExternalApiProtocol)}</stringProp>
-          <stringProp name="HTTPSampler.port">${__P(wasteMovementExternalApiPort)}</stringProp>
+          <stringProp name="HTTPSampler.domain">${__P(wasteMovementBackendDomain)}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${__P(wasteMovementBackendProtocol)}</stringProp>
+          <stringProp name="HTTPSampler.port">${__P(wasteMovementBackendPort)}</stringProp>
           <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
-          <stringProp name="HTTPSampler.path">${__P(wasteMovementExternalApiBasePath)}/movements/receive</stringProp>
+          <stringProp name="HTTPSampler.path">${__P(wasteMovementBackendBasePath)}/bulk/${__UUID()}/movements/receive</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
-          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
             <collectionProp name="Arguments.arguments">
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <boolProp name="HTTPArgument.use_equals">true</boolProp>
-                <stringProp name="Argument.value">${postPayload}</stringProp>
+                <boolProp name="HTTPArgument.use_equals">false</boolProp>
+                <stringProp name="Argument.value">${bulkPostPayload}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Remove CDP Request ID When Not Local" enabled="true">
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Generate Bulk Create Waste Movement Payload" enabled="true">
             <stringProp name="scriptLanguage">groovy</stringProp>
-            <stringProp name="filename">scripts/headers/remove_cdp_request_id_when_not_local.groovy</stringProp>
+            <stringProp name="filename">scripts/payloads/bulk_create_waste_movement_payload.groovy</stringProp>
             <stringProp name="parameters"></stringProp>
             <stringProp name="cacheKey">false</stringProp>
             <stringProp name="script"></stringProp>
@@ -93,7 +89,15 @@
               </elementProp>
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">Bearer ${__P(global_access_token)}</stringProp>
+                <stringProp name="Header.value">Basic ${__P(base64EncodedCredentialWasteOrganisationBackend)}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">x-api-key</stringProp>
+                <stringProp name="Header.value">${__P(cdpApiKey)}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Accept-Encoding</stringProp>
+                <stringProp name="Header.value">identity</stringProp>
               </elementProp>
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">x-cdp-request-id</stringProp>
@@ -110,7 +114,7 @@
             <stringProp name="script"></stringProp>
           </JSR223Assertion>
           <hashTree/>
-          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert Create Response Code was Successful" enabled="true">
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert Bulk Create Response Code was Successful" enabled="true">
             <collectionProp name="Asserion.test_strings">
               <stringProp name="49587">201</stringProp>
             </collectionProp>
@@ -121,17 +125,34 @@
           </ResponseAssertion>
           <hashTree/>
           <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Assert Response Time Threshold" enabled="true">
-            <stringProp name="DurationAssertion.duration">8000</stringProp>
+            <stringProp name="DurationAssertion.duration">30000</stringProp>
           </DurationAssertion>
           <hashTree/>
-          <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert Waste Tracking ID exists in JSON " enabled="true">
-            <stringProp name="JSON_PATH">$.wasteTrackingId</stringProp>
+          <!-- <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert Bulk Create Status" enabled="true">
+            <stringProp name="JSON_PATH">$.status</stringProp>
+            <stringProp name="EXPECTED_VALUE">MOVEMENTS_CREATED</stringProp>
+            <boolProp name="JSONVALIDATION">true</boolProp>
+            <boolProp name="EXPECT_NULL">false</boolProp>
+            <boolProp name="INVERT">false</boolProp>
+            <boolProp name="ISREGEX">false</boolProp>
+          </JSONPathAssertion>
+          <hashTree/> -->
+          <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert Waste Tracking IDs exist in JSON" enabled="true">
+            <stringProp name="JSON_PATH">$.movements[0].wasteTrackingId</stringProp>
             <stringProp name="EXPECTED_VALUE"></stringProp>
             <boolProp name="JSONVALIDATION">false</boolProp>
             <boolProp name="EXPECT_NULL">false</boolProp>
             <boolProp name="INVERT">false</boolProp>
             <boolProp name="ISREGEX">false</boolProp>
           </JSONPathAssertion>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert Waste Tracking ID Count" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+            <stringProp name="filename">scripts/assertions/assert_bulk_create_count.groovy</stringProp>
+            <stringProp name="script"></stringProp>
+          </JSR223Assertion>
           <hashTree/>
           <UniformRandomTimer guiclass="UniformRandomTimerGui" testclass="UniformRandomTimer" testname="Think Time" enabled="true">
             <stringProp name="ConstantTimer.delay">500</stringProp>
@@ -141,7 +162,7 @@
         </hashTree>
       </hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Spike Phase 2 - High Load" enabled="true">
-        <intProp name="ThreadGroup.num_threads">75</intProp>
+        <intProp name="ThreadGroup.num_threads">3</intProp>
         <intProp name="ThreadGroup.ramp_time">5</intProp>
         <longProp name="ThreadGroup.duration">180</longProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -153,33 +174,32 @@
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Waste Movement" enabled="true">
-          <stringProp name="HTTPSampler.embedded_url_re">.*</stringProp>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Bulk Create Waste Movement" enabled="true">
           <intProp name="HTTPSampler.connect_timeout">60000</intProp>
           <intProp name="HTTPSampler.response_timeout">60000</intProp>
-          <stringProp name="HTTPSampler.domain">${__P(wasteMovementExternalApiDomain)}</stringProp>
-          <stringProp name="HTTPSampler.protocol">${__P(wasteMovementExternalApiProtocol)}</stringProp>
-          <stringProp name="HTTPSampler.port">${__P(wasteMovementExternalApiPort)}</stringProp>
+          <stringProp name="HTTPSampler.domain">${__P(wasteMovementBackendDomain)}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${__P(wasteMovementBackendProtocol)}</stringProp>
+          <stringProp name="HTTPSampler.port">${__P(wasteMovementBackendPort)}</stringProp>
           <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
-          <stringProp name="HTTPSampler.path">${__P(wasteMovementExternalApiBasePath)}/movements/receive</stringProp>
+          <stringProp name="HTTPSampler.path">${__P(wasteMovementBackendBasePath)}/bulk/${__UUID()}/movements/receive</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
-          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
             <collectionProp name="Arguments.arguments">
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <boolProp name="HTTPArgument.use_equals">true</boolProp>
-                <stringProp name="Argument.value">${postPayload}</stringProp>
+                <boolProp name="HTTPArgument.use_equals">false</boolProp>
+                <stringProp name="Argument.value">${bulkPostPayload}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Remove CDP Request ID When Not Local" enabled="true">
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Generate Bulk Create Waste Movement Payload" enabled="true">
             <stringProp name="scriptLanguage">groovy</stringProp>
-            <stringProp name="filename">scripts/headers/remove_cdp_request_id_when_not_local.groovy</stringProp>
+            <stringProp name="filename">scripts/payloads/bulk_create_waste_movement_payload.groovy</stringProp>
             <stringProp name="parameters"></stringProp>
             <stringProp name="cacheKey">false</stringProp>
             <stringProp name="script"></stringProp>
@@ -193,7 +213,15 @@
               </elementProp>
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">Bearer ${__P(global_access_token)}</stringProp>
+                <stringProp name="Header.value">Basic ${__P(base64EncodedCredentialWasteOrganisationBackend)}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">x-api-key</stringProp>
+                <stringProp name="Header.value">${__P(cdpApiKey)}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Accept-Encoding</stringProp>
+                <stringProp name="Header.value">identity</stringProp>
               </elementProp>
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">x-cdp-request-id</stringProp>
@@ -210,7 +238,7 @@
             <stringProp name="script"></stringProp>
           </JSR223Assertion>
           <hashTree/>
-          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert Create Response Code was Successful" enabled="true">
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert Bulk Create Response Code was Successful" enabled="true">
             <collectionProp name="Asserion.test_strings">
               <stringProp name="49587">201</stringProp>
             </collectionProp>
@@ -221,17 +249,34 @@
           </ResponseAssertion>
           <hashTree/>
           <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Assert Response Time Threshold" enabled="true">
-            <stringProp name="DurationAssertion.duration">8000</stringProp>
+            <stringProp name="DurationAssertion.duration">30000</stringProp>
           </DurationAssertion>
           <hashTree/>
-          <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert Waste Tracking ID exists in JSON " enabled="true">
-            <stringProp name="JSON_PATH">$.wasteTrackingId</stringProp>
+          <!-- <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert Bulk Create Status" enabled="true">
+            <stringProp name="JSON_PATH">$.status</stringProp>
+            <stringProp name="EXPECTED_VALUE">MOVEMENTS_CREATED</stringProp>
+            <boolProp name="JSONVALIDATION">true</boolProp>
+            <boolProp name="EXPECT_NULL">false</boolProp>
+            <boolProp name="INVERT">false</boolProp>
+            <boolProp name="ISREGEX">false</boolProp>
+          </JSONPathAssertion>
+          <hashTree/> -->
+          <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert Waste Tracking IDs exist in JSON" enabled="true">
+            <stringProp name="JSON_PATH">$.movements[0].wasteTrackingId</stringProp>
             <stringProp name="EXPECTED_VALUE"></stringProp>
             <boolProp name="JSONVALIDATION">false</boolProp>
             <boolProp name="EXPECT_NULL">false</boolProp>
             <boolProp name="INVERT">false</boolProp>
             <boolProp name="ISREGEX">false</boolProp>
           </JSONPathAssertion>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert Waste Tracking ID Count" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+            <stringProp name="filename">scripts/assertions/assert_bulk_create_count.groovy</stringProp>
+            <stringProp name="script"></stringProp>
+          </JSR223Assertion>
           <hashTree/>
           <UniformRandomTimer guiclass="UniformRandomTimerGui" testclass="UniformRandomTimer" testname="Think Time" enabled="true">
             <stringProp name="ConstantTimer.delay">500</stringProp>
@@ -241,7 +286,7 @@
         </hashTree>
       </hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Spike Phase 3 - Recovery" enabled="true">
-        <intProp name="ThreadGroup.num_threads">10</intProp>
+        <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">10</intProp>
         <longProp name="ThreadGroup.duration">180</longProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -253,33 +298,32 @@
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Waste Movement" enabled="true">
-          <stringProp name="HTTPSampler.embedded_url_re">.*</stringProp>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Bulk Create Waste Movement" enabled="true">
           <intProp name="HTTPSampler.connect_timeout">60000</intProp>
           <intProp name="HTTPSampler.response_timeout">60000</intProp>
-          <stringProp name="HTTPSampler.domain">${__P(wasteMovementExternalApiDomain)}</stringProp>
-          <stringProp name="HTTPSampler.protocol">${__P(wasteMovementExternalApiProtocol)}</stringProp>
-          <stringProp name="HTTPSampler.port">${__P(wasteMovementExternalApiPort)}</stringProp>
+          <stringProp name="HTTPSampler.domain">${__P(wasteMovementBackendDomain)}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${__P(wasteMovementBackendProtocol)}</stringProp>
+          <stringProp name="HTTPSampler.port">${__P(wasteMovementBackendPort)}</stringProp>
           <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
-          <stringProp name="HTTPSampler.path">${__P(wasteMovementExternalApiBasePath)}/movements/receive</stringProp>
+          <stringProp name="HTTPSampler.path">${__P(wasteMovementBackendBasePath)}/bulk/${__UUID()}/movements/receive</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
-          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
             <collectionProp name="Arguments.arguments">
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <boolProp name="HTTPArgument.use_equals">true</boolProp>
-                <stringProp name="Argument.value">${postPayload}</stringProp>
+                <boolProp name="HTTPArgument.use_equals">false</boolProp>
+                <stringProp name="Argument.value">${bulkPostPayload}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Remove CDP Request ID When Not Local" enabled="true">
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Generate Bulk Create Waste Movement Payload" enabled="true">
             <stringProp name="scriptLanguage">groovy</stringProp>
-            <stringProp name="filename">scripts/headers/remove_cdp_request_id_when_not_local.groovy</stringProp>
+            <stringProp name="filename">scripts/payloads/bulk_create_waste_movement_payload.groovy</stringProp>
             <stringProp name="parameters"></stringProp>
             <stringProp name="cacheKey">false</stringProp>
             <stringProp name="script"></stringProp>
@@ -293,7 +337,15 @@
               </elementProp>
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">Bearer ${__P(global_access_token)}</stringProp>
+                <stringProp name="Header.value">Basic ${__P(base64EncodedCredentialWasteOrganisationBackend)}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">x-api-key</stringProp>
+                <stringProp name="Header.value">${__P(cdpApiKey)}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Accept-Encoding</stringProp>
+                <stringProp name="Header.value">identity</stringProp>
               </elementProp>
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">x-cdp-request-id</stringProp>
@@ -310,7 +362,7 @@
             <stringProp name="script"></stringProp>
           </JSR223Assertion>
           <hashTree/>
-          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert Create Response Code was Successful" enabled="true">
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert Bulk Create Response Code was Successful" enabled="true">
             <collectionProp name="Asserion.test_strings">
               <stringProp name="49587">201</stringProp>
             </collectionProp>
@@ -321,17 +373,34 @@
           </ResponseAssertion>
           <hashTree/>
           <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Assert Response Time Threshold" enabled="true">
-            <stringProp name="DurationAssertion.duration">8000</stringProp>
+            <stringProp name="DurationAssertion.duration">30000</stringProp>
           </DurationAssertion>
           <hashTree/>
-          <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert Waste Tracking ID exists in JSON " enabled="true">
-            <stringProp name="JSON_PATH">$.wasteTrackingId</stringProp>
+          <!-- <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert Bulk Create Status" enabled="true">
+            <stringProp name="JSON_PATH">$.status</stringProp>
+            <stringProp name="EXPECTED_VALUE">MOVEMENTS_CREATED</stringProp>
+            <boolProp name="JSONVALIDATION">true</boolProp>
+            <boolProp name="EXPECT_NULL">false</boolProp>
+            <boolProp name="INVERT">false</boolProp>
+            <boolProp name="ISREGEX">false</boolProp>
+          </JSONPathAssertion>
+          <hashTree/> -->
+          <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert Waste Tracking IDs exist in JSON" enabled="true">
+            <stringProp name="JSON_PATH">$.movements[0].wasteTrackingId</stringProp>
             <stringProp name="EXPECTED_VALUE"></stringProp>
             <boolProp name="JSONVALIDATION">false</boolProp>
             <boolProp name="EXPECT_NULL">false</boolProp>
             <boolProp name="INVERT">false</boolProp>
             <boolProp name="ISREGEX">false</boolProp>
           </JSONPathAssertion>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert Waste Tracking ID Count" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+            <stringProp name="filename">scripts/assertions/assert_bulk_create_count.groovy</stringProp>
+            <stringProp name="script"></stringProp>
+          </JSR223Assertion>
           <hashTree/>
           <UniformRandomTimer guiclass="UniformRandomTimerGui" testclass="UniformRandomTimer" testname="Think Time" enabled="true">
             <stringProp name="ConstantTimer.delay">500</stringProp>
