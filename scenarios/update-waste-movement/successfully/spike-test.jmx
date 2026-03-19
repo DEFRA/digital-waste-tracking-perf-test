@@ -101,7 +101,7 @@
             <stringProp name="scriptLanguage">groovy</stringProp>
             <stringProp name="parameters"></stringProp>
             <stringProp name="cacheKey">false</stringProp>
-            <stringProp name="filename">scripts/logging/x.groovy</stringProp>
+            <stringProp name="filename">scripts/logging/after-response-log-hook.groovy</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223Assertion>
           <hashTree/>
@@ -182,7 +182,7 @@
             <stringProp name="scriptLanguage">groovy</stringProp>
             <stringProp name="parameters"></stringProp>
             <stringProp name="cacheKey">false</stringProp>
-            <stringProp name="filename">scripts/logging/x.groovy</stringProp>
+            <stringProp name="filename">scripts/logging/after-response-log-hook.groovy</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223Assertion>
           <hashTree/>
@@ -261,7 +261,7 @@
             <stringProp name="scriptLanguage">groovy</stringProp>
             <stringProp name="parameters"></stringProp>
             <stringProp name="cacheKey">false</stringProp>
-            <stringProp name="filename">scripts/logging/x.groovy</stringProp>
+            <stringProp name="filename">scripts/logging/after-response-log-hook.groovy</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223Assertion>
           <hashTree/>
@@ -342,7 +342,7 @@
             <stringProp name="scriptLanguage">groovy</stringProp>
             <stringProp name="parameters"></stringProp>
             <stringProp name="cacheKey">false</stringProp>
-            <stringProp name="filename">scripts/logging/x.groovy</stringProp>
+            <stringProp name="filename">scripts/logging/after-response-log-hook.groovy</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223Assertion>
           <hashTree/>
@@ -421,7 +421,7 @@
             <stringProp name="scriptLanguage">groovy</stringProp>
             <stringProp name="parameters"></stringProp>
             <stringProp name="cacheKey">false</stringProp>
-            <stringProp name="filename">scripts/logging/x.groovy</stringProp>
+            <stringProp name="filename">scripts/logging/after-response-log-hook.groovy</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223Assertion>
           <hashTree/>
@@ -502,7 +502,7 @@
             <stringProp name="scriptLanguage">groovy</stringProp>
             <stringProp name="parameters"></stringProp>
             <stringProp name="cacheKey">false</stringProp>
-            <stringProp name="filename">scripts/logging/x.groovy</stringProp>
+            <stringProp name="filename">scripts/logging/after-response-log-hook.groovy</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223Assertion>
           <hashTree/>

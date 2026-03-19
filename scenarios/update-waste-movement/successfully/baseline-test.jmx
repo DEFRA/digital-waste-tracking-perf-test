@@ -83,14 +83,6 @@
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="Log Error Response" enabled="true">
-            <stringProp name="scriptLanguage">groovy</stringProp>
-            <stringProp name="filename">scripts/logging/log_error_response.groovy</stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="cacheKey">false</stringProp>
-            <stringProp name="script"></stringProp>
-          </JSR223PostProcessor>
-          <hashTree/>
           <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
@@ -108,7 +100,7 @@
             <stringProp name="scriptLanguage">groovy</stringProp>
             <stringProp name="parameters"></stringProp>
             <stringProp name="cacheKey">false</stringProp>
-            <stringProp name="filename">scripts/logging/x.groovy</stringProp>
+            <stringProp name="filename">scripts/logging/after-response-log-hook.groovy</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223Assertion>
           <hashTree/>
@@ -172,14 +164,6 @@
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="Log Error Response" enabled="true">
-            <stringProp name="scriptLanguage">groovy</stringProp>
-            <stringProp name="filename">scripts/logging/log_error_response.groovy</stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="cacheKey">false</stringProp>
-            <stringProp name="script"></stringProp>
-          </JSR223PostProcessor>
-          <hashTree/>
           <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
@@ -197,7 +181,7 @@
             <stringProp name="scriptLanguage">groovy</stringProp>
             <stringProp name="parameters"></stringProp>
             <stringProp name="cacheKey">false</stringProp>
-            <stringProp name="filename">scripts/logging/x.groovy</stringProp>
+            <stringProp name="filename">scripts/logging/after-response-log-hook.groovy</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223Assertion>
           <hashTree/>
