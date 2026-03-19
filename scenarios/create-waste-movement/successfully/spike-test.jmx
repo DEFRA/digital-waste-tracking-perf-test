@@ -77,6 +77,14 @@
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Remove CDP Request ID When Not Local" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="filename">scripts/headers/remove_cdp_request_id_when_not_local.groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+            <stringProp name="script"></stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
           <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
@@ -86,6 +94,10 @@
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Authorization</stringProp>
                 <stringProp name="Header.value">Bearer ${__P(global_access_token)}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">x-cdp-request-id</stringProp>
+                <stringProp name="Header.value">${__UUID()}</stringProp>
               </elementProp>
             </collectionProp>
           </HeaderManager>
@@ -165,6 +177,14 @@
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Remove CDP Request ID When Not Local" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="filename">scripts/headers/remove_cdp_request_id_when_not_local.groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+            <stringProp name="script"></stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
           <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
@@ -174,6 +194,10 @@
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Authorization</stringProp>
                 <stringProp name="Header.value">Bearer ${__P(global_access_token)}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">x-cdp-request-id</stringProp>
+                <stringProp name="Header.value">${__UUID()}</stringProp>
               </elementProp>
             </collectionProp>
           </HeaderManager>
@@ -253,6 +277,14 @@
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Remove CDP Request ID When Not Local" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="filename">scripts/headers/remove_cdp_request_id_when_not_local.groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+            <stringProp name="script"></stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
           <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
@@ -262,6 +294,10 @@
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Authorization</stringProp>
                 <stringProp name="Header.value">Bearer ${__P(global_access_token)}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">x-cdp-request-id</stringProp>
+                <stringProp name="Header.value">${__UUID()}</stringProp>
               </elementProp>
             </collectionProp>
           </HeaderManager>

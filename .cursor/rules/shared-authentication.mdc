@@ -76,6 +76,9 @@ Bulk create/update tests use a backend authentication approach with Basic auth a
   - `Authorization: Basic ${__P(base64EncodedCredentialWasteOrganisationBackend)}`
   - `x-api-key: ${__P(cdpApiKey)}`
   - `Accept-Encoding: identity`
+  - `x-cdp-request-id: ${__UUID()}` (always sent)
+
+**Public API (non-bulk)**: Add `x-cdp-request-id: ${__UUID()}` in HeaderManager and use `scripts/headers/remove_cdp_request_id_when_not_local.groovy` PreProcessor to remove it when `ENVIRONMENT≠local` (header is always added, then removed for non-local).
 - **Scope**: This pattern is used in:
   - `scenarios/bulk-create-waste-movement/successfully/*.jmx`
   - `scenarios/bulk-update-waste-movement/successfully/*.jmx`

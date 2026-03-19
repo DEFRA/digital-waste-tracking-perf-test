@@ -169,6 +169,7 @@ URL components are derived by `scripts/config/configure_waste_movement_external_
 - **No Encoding**: Set `always_encode=false` and `use_equals=false` for JSON content
 - **Headers**: Use HeaderManager for Content-Type and Authorization headers
 - **Authorization**: Use `${__P(global_access_token)}` for shared authentication token
+- **x-cdp-request-id (public API, local only)**: Add `x-cdp-request-id: ${__UUID()}` in HeaderManager, plus JSR223 PreProcessor `scripts/headers/remove_cdp_request_id_when_not_local.groovy` (first child of sampler) to remove it when `ENVIRONMENT≠local`; header is always added then removed for non-local
 
 ## Standard JMX File Components
 
@@ -183,7 +184,7 @@ URL components are derived by `scripts/config/configure_waste_movement_external_
 2. **Thread Group Level**:
    - HTTP Samplers with HTTP Arguments configuration
    - JSR223 PostProcessor for `scripts/logging/after-response-log-hook.groovy` as first child of each HTTP Sampler (runs when response is returned, before assertions; logs 4xx/5xx when `DEBUG=true`)
-   - HeaderManager for Content-Type and Authorization
+   - HeaderManager for Content-Type and Authorization (public API: add x-cdp-request-id with `remove_cdp_request_id_when_not_local.groovy` PreProcessor for local-only behaviour)
    - ResponseAssertion for success validation
    - DurationAssertion for response time thresholds
    - JSONPostProcessor for data extraction (when needed)
@@ -215,6 +216,7 @@ URL components are derived by `scripts/config/configure_waste_movement_external_
 - Use `scripts/create_waste_movement_payload.groovy` for create operations
 - Use `scripts/update_waste_movement_payload.groovy` for update operations
 - Use `scripts/logging/after-response-log-hook.groovy` as JSR223 PostProcessor (first after each HTTP Sampler; runs when response is returned, before assertions; logs 4xx/5xx when `DEBUG=true`)
+- Use `scripts/headers/remove_cdp_request_id_when_not_local.groovy` as JSR223 PreProcessor (first child of each HTTP Sampler) for public API tests – removes x-cdp-request-id when `ENVIRONMENT≠local`
 
 ### Variable Usage
 - Use `${postPayload}` for POST/create operations
