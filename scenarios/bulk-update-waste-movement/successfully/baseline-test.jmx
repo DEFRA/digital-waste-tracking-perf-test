@@ -236,7 +236,6 @@
             <stringProp name="script"></stringProp>
           </JSR223Assertion>
           <hashTree/>
-          <hashTree/>
           <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert Bulk Update Response Code was Successful" enabled="true">
             <collectionProp name="Asserion.test_strings">
               <stringProp name="49586">200</stringProp>
