@@ -70,6 +70,14 @@
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Init Bulk Upload Movement Metrics" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="filename">scripts/logging/bulk_upload_metrics_init.groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+            <stringProp name="script"></stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Generate Bulk Create Waste Movement Payload" enabled="true">
             <stringProp name="scriptLanguage">groovy</stringProp>
             <stringProp name="filename">scripts/payloads/bulk_create_waste_movement_payload.groovy</stringProp>
@@ -102,6 +110,14 @@
               </elementProp>
             </collectionProp>
           </HeaderManager>
+          <hashTree/>
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="Record Bulk Movements In Request" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="filename">scripts/logging/bulk_upload_sample_metrics.groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+            <stringProp name="script"></stringProp>
+          </JSR223PostProcessor>
           <hashTree/>
           <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert Waste Tracking ID Count" enabled="true">
             <stringProp name="scriptLanguage">groovy</stringProp>

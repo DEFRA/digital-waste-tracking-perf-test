@@ -52,6 +52,9 @@ for fileorFolder in ${JM_REPORT_FOLDER} ${JM_LOG_FOLDER} ${JM_RESULTS_FOLDER}; d
   fi
 done
 
+# Ensure temp/ exists for bulk cumulative state (temp/bulk-upload-cumulative-state.txt); delete that file to reset the counter.
+mkdir -p "${REPO_LOCATION}/temp"
+
 # Build list of JMX files: PROFILE is one of external-api, bulk-upload, all, or a path to a .jmx under scenarios
 echo "\n\nRunning profile: ${PROFILE}"
 case "$PROFILE" in
@@ -119,7 +122,9 @@ for jmx_file in $jmx_files; do
     -Jjmeter.save.saveservice.response_data=true \
     -Jjmeter.save.saveservice.response_message=true \
     -Jjmeter.save.saveservice.assertion_results_failure_message=true \
-    ${JM_COMMAND_LINE_PROXY_OPTION}
+    -Jsample_variables=bulkMovementsInRequest,bulkMovementsCumulativeTotal,bulkMovementsPerSecond \
+    ${JM_COMMAND_LINE_PROXY_OPTION} \
+    -q ${REPO_LOCATION}/user.properties
   single_test_exit_code=$?
   if [ "$single_test_exit_code" -ne 0 ]; then
     echo "Error running: $(basename "$jmx_file"), error code: $single_test_exit_code"
@@ -129,7 +134,12 @@ done
 
 # Generate report from combined results
 echo "\n\nGenerating consolidated report..."
-jmeter -g ${JM_JTL_FILE} -e -o ${JM_REPORT_FOLDER} -j ${JM_LOG_REPORT} 
+jmeter -g ${JM_JTL_FILE} -e -o ${JM_REPORT_FOLDER} -j ${JM_LOG_REPORT} -q ${REPO_LOCATION}/user.properties
+
+# Bulk upload tests may write movement-count summary next to the JTL (see scripts/logging/bulk_upload_metrics_init.groovy)
+if [ -f "${JM_RESULTS_FOLDER}/bulk-movement-metrics.txt" ]; then
+  cp "${JM_RESULTS_FOLDER}/bulk-movement-metrics.txt" "${JM_REPORT_FOLDER}/"
+fi
 
 if [ "$CI" = "true" ]; then
   # Publish the results into S3 so they can be displayed in the CDP Portal
