@@ -23,18 +23,14 @@
           <stringProp name="-1269067550">uploadFilePath</stringProp>
           <stringProp name="-1830691881">x-api-key</stringProp>
           <stringProp name="819141162">backend_service_endpoint</stringProp>
-          <stringProp name="20001">backend_basic_auth_username</stringProp>
-          <stringProp name="20002">backend_basic_auth_password</stringProp>
         </collectionProp>
         <collectionProp name="UserParameters.thread_values">
-          <collectionProp name="-805863330">
-            <stringProp name="827445482">${__P(frontendHost)}</stringProp>
-            <stringProp name="1848630433">${__P(defraStubHost)}</stringProp>
+          <collectionProp name="-349733025">
+            <stringProp name="827445482">waste-organisation-frontend.${__P(environment)}.cdp-int.defra.cloud</stringProp>
+            <stringProp name="1848630433">cdp-defra-id-stub.${__P(environment)}.cdp-int.defra.cloud</stringProp>
             <stringProp name="955087808">${__P(uploadFilePath,Test1-no-errors-500WM.xlsx)}</stringProp>
             <stringProp name="-2023929895">${__P(cdpApiKey)}</stringProp>
-            <stringProp name="-877124766">${__P(backendServiceEndpoint)}</stringProp>
-            <stringProp name="20003">${__P(backendBasicAuthUsername)}</stringProp>
-            <stringProp name="20004">${__P(backendBasicAuthPassword)}</stringProp>
+            <stringProp name="-877124766">${__P(backendServiceEndpoint,waste-organisation-backend.${__P(environment)}.cdp-int.defra.cloud)}</stringProp>
           </collectionProp>
         </collectionProp>
         <boolProp name="UserParameters.per_iteration">true</boolProp>
@@ -54,7 +50,7 @@
       <hashTree/>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Unified Login + Upload/Get Org Journey" enabled="true">
         <intProp name="ThreadGroup.num_threads">10</intProp>
-        <intProp name="ThreadGroup.ramp_time">20</intProp>
+        <intProp name="ThreadGroup.ramp_time">60</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
@@ -1101,7 +1097,7 @@ if (actual != expected) {
           </hashTree>
           <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="true" enabled="true"/>
           <hashTree>
-            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
               <collectionProp name="HeaderManager.headers">
                 <elementProp name="" elementType="Header">
                   <stringProp name="Header.name">content-type</stringProp>
@@ -1118,7 +1114,7 @@ if (actual != expected) {
               </collectionProp>
             </HeaderManager>
             <hashTree/>
-            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /organisation/apiCode">
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /organisation/apiCode" enabled="true">
               <stringProp name="HTTPSampler.domain">${backend_service_endpoint}</stringProp>
               <stringProp name="HTTPSampler.protocol">https</stringProp>
               <stringProp name="HTTPSampler.path">/waste-organisation-backend/organisation/${code}</stringProp>
@@ -1214,6 +1210,43 @@ if (actual != expected) {
           <stringProp name="ConstantTimer.delay">500</stringProp>
           <stringProp name="RandomTimer.range">1000</stringProp>
         </UniformRandomTimer>
+        <hashTree/>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
         <hashTree/>
       </hashTree>
     </hashTree>

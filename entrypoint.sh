@@ -104,6 +104,12 @@ echo "Using PROFILE: $PROFILE"
 echo "Using DEBUG: ${DEBUG:-false}"
 echo "Using jmx_files: $jmx_files"
 
+# Build a single shared Basic-auth header for tests that need it.
+ORG_BACKEND_BASIC_AUTH_HEADER=""
+if [ -n "${ORG_BACKEND_BASIC_AUTH_USERNAME:-}" ] || [ -n "${ORG_BACKEND_BASIC_AUTH_PASSWORD:-}" ]; then
+  ORG_BACKEND_BASIC_AUTH_HEADER=$(printf '%s' "${ORG_BACKEND_BASIC_AUTH_USERNAME:-}:${ORG_BACKEND_BASIC_AUTH_PASSWORD:-}" | base64 | tr -d '\n')
+fi
+
 # Run all JMX files in scenarios folder (including subdirectories)
 test_exit_code=0
 for jmx_file in $jmx_files; do
@@ -113,6 +119,10 @@ for jmx_file in $jmx_files; do
     -Jci=${CI} \
     -JapiCode=${API_CODE} \
     -JserviceAuthPasswordWasteOrganisationBackend=${SERVICE_AUTH_PASSWORD_WASTE_ORGANISATION_BACKEND} \
+    -JbackendServiceEndpoint=${ORG_BACKEND_SERVICE_ENDPOINT:-} \
+    -JbackendBasicAuthHeader=${ORG_BACKEND_BASIC_AUTH_HEADER:-} \
+    -JuploadFilePath=${UPLOAD_FILE_PATH:-} \
+    -JapiCodesCsvFile=${API_CODES_CSV_FILE:-} \
     -JclientId=${COGNITO_CLIENT_ID:-} \
     -JclientSecret=${COGNITO_CLIENT_SECRET:-} \
     -JauthBaseUrl=${COGNITO_OAUTH_BASE_URL:-} \
