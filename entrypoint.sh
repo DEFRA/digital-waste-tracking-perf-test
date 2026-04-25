@@ -19,7 +19,7 @@ check_variable "$PROFILE" "PROFILE"
 check_variable "$ENVIRONMENT" "ENVIRONMENT"
 check_variable "$CI" "CI"
 check_variable "$API_CODE" "API_CODE"
-check_variable "$SERVICE_AUTH_PASSWORD_WASTE_ORGANISATION_BACKEND" "SERVICE_AUTH_PASSWORD_WASTE_ORGANISATION_BACKEND"
+check_variable "$SERVICE_AUTH_WASTE_ORGANISATION_BACKEND" "SERVICE_AUTH_WASTE_ORGANISATION_BACKEND"
 
 # Log the run_id and environment if CI is true
 if [ "$CI" = "true" ]; then
