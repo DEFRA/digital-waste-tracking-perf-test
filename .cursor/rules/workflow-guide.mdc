@@ -16,7 +16,6 @@ alwaysApply: true
 ## Key Files to Understand
 - `scenarios/` - Contains organized JMX test files by operation and test type
 - `scripts/auth/get_accessToken.groovy` - Shared OAuth2 authentication (skipped when ENVIRONMENT=local)
-- `scripts/auth/get_waste_organisation_backend_auth.groovy` - Backend authentication script for bulk tests
 - `scripts/config/configure_waste_movement_external_api_url.groovy` - Derives public API URL from ENVIRONMENT (localhost:3001 local; waste-movement-external-api.api.${env}.cdp-int.defra.cloud otherwise)
 - `scripts/config/configure_waste_movement_backend_url.groovy` - Derives bulk backend URL from ENVIRONMENT and CI
 - `scripts/payloads/create_waste_movement_payload.groovy` - Dynamic payload generation for create operations (sets `${postPayload}`)

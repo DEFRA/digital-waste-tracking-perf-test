@@ -19,7 +19,7 @@ check_variable "$PROFILE" "PROFILE"
 check_variable "$ENVIRONMENT" "ENVIRONMENT"
 check_variable "$CI" "CI"
 check_variable "$API_CODE" "API_CODE"
-check_variable "$SERVICE_AUTH_PASSWORD_WASTE_ORGANISATION_BACKEND" "SERVICE_AUTH_PASSWORD_WASTE_ORGANISATION_BACKEND"
+check_variable "$SERVICE_AUTH_WASTE_ORGANISATION_BACKEND" "SERVICE_AUTH_WASTE_ORGANISATION_BACKEND"
 
 # Log the run_id and environment if CI is true
 if [ "$CI" = "true" ]; then
@@ -104,6 +104,7 @@ echo "Using PROFILE: $PROFILE"
 echo "Using DEBUG: ${DEBUG:-false}"
 echo "Using jmx_files: $jmx_files"
 
+
 # Run all JMX files in scenarios folder (including subdirectories)
 test_exit_code=0
 for jmx_file in $jmx_files; do
@@ -112,7 +113,11 @@ for jmx_file in $jmx_files; do
     -Jenvironment=${ENVIRONMENT} \
     -Jci=${CI} \
     -JapiCode=${API_CODE} \
-    -JserviceAuthPasswordWasteOrganisationBackend=${SERVICE_AUTH_PASSWORD_WASTE_ORGANISATION_BACKEND} \
+    -JserviceAuthWasteOrganisationBackend=${SERVICE_AUTH_WASTE_ORGANISATION_BACKEND} \
+    -JbackendServiceEndpoint=${ORG_BACKEND_SERVICE_ENDPOINT:-} \
+    -JbackendBasicAuthHeader=${SERVICE_AUTH_WASTE_MOVEMENT_EXTERNAL_API:-} \
+    -JuploadFilePath=${UPLOAD_FILE_PATH:-} \
+    -JapiCodesCsvFile=${API_CODES_CSV_FILE:-} \
     -JclientId=${COGNITO_CLIENT_ID:-} \
     -JclientSecret=${COGNITO_CLIENT_SECRET:-} \
     -JauthBaseUrl=${COGNITO_OAUTH_BASE_URL:-} \

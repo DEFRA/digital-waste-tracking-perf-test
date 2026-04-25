@@ -1,0 +1,1219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="e2e User journey">
+      <stringProp name="TestPlan.comments">Generated from test1.har sorted by startedDateTime</stringProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="testType" elementType="Argument">
+            <stringProp name="Argument.name">testType</stringProp>
+            <stringProp name="Argument.value">Load</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+        </collectionProp>
+      </elementProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+    </TestPlan>
+    <hashTree>
+      <UserParameters guiclass="UserParametersGui" testclass="UserParameters" testname="User Parameters">
+        <collectionProp name="UserParameters.names">
+          <stringProp name="0">frontend_host</stringProp>
+          <stringProp name="1">defra_stub_host</stringProp>
+          <stringProp name="-1269067550">uploadFilePath</stringProp>
+          <stringProp name="-1830691881">x-api-key</stringProp>
+          <stringProp name="819141162">backend_service_endpoint</stringProp>
+        </collectionProp>
+        <collectionProp name="UserParameters.thread_values">
+          <collectionProp name="-349733025">
+            <stringProp name="827445482">waste-organisation-frontend.${__P(environment)}.cdp-int.defra.cloud</stringProp>
+            <stringProp name="1848630433">cdp-defra-id-stub.${__P(environment)}.cdp-int.defra.cloud</stringProp>
+            <stringProp name="955087808">${__P(uploadFilePath,Test1-no-errors-500WM.xlsx)}</stringProp>
+            <stringProp name="-2023929895">${__P(cdpApiKey)}</stringProp>
+            <stringProp name="-877124766">${__P(backendServiceEndpoint,waste-organisation-backend.${__P(environment)}.cdp-int.defra.cloud)}</stringProp>
+          </collectionProp>
+        </collectionProp>
+        <boolProp name="UserParameters.per_iteration">true</boolProp>
+      </UserParameters>
+      <hashTree/>
+      <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config" enabled="true">
+        <stringProp name="filename">${__P(apiCodesCsvFile,apiCodes.csv)}</stringProp>
+        <stringProp name="fileEncoding"></stringProp>
+        <stringProp name="variableNames">code,</stringProp>
+        <boolProp name="ignoreFirstLine">false</boolProp>
+        <stringProp name="delimiter">,</stringProp>
+        <boolProp name="quotedData">false</boolProp>
+        <boolProp name="recycle">true</boolProp>
+        <boolProp name="stopThread">false</boolProp>
+        <stringProp name="shareMode">shareMode.all</stringProp>
+      </CSVDataSet>
+      <hashTree/>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Unified Login + Upload/Get Org Journey">
+        <intProp name="ThreadGroup.num_threads">175</intProp>
+        <intProp name="ThreadGroup.ramp_time">300</intProp>
+        <longProp name="ThreadGroup.duration">900</longProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <intProp name="LoopController.loops">-1</intProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="HTTP Cookie Manager" enabled="true">
+          <collectionProp name="CookieManager.cookies"/>
+          <boolProp name="CookieManager.clearEachIteration">true</boolProp>
+          <boolProp name="CookieManager.controlledByThreadGroup">false</boolProp>
+        </CookieManager>
+        <hashTree/>
+        <CacheManager guiclass="CacheManagerGui" testclass="CacheManager" testname="HTTP Cache Manager" enabled="true">
+          <boolProp name="clearEachIteration">true</boolProp>
+          <boolProp name="useExpires">true</boolProp>
+          <boolProp name="CacheManager.controlledByThread">false</boolProp>
+        </CacheManager>
+        <hashTree/>
+        <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="After Response Log Hook" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="cacheKey">false</stringProp>
+          <stringProp name="filename">scripts/logging/after-response-log-hook.groovy</stringProp>
+          <stringProp name="script"></stringProp>
+        </JSR223PostProcessor>
+        <hashTree/>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Assign traffic segment (60% direct API)" enabled="true">
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="script">// Deterministic split by thread number: exactly 60% direct API (40% main journey/UI)
+int threadNum = ctx.getThreadNum() // 0-based
+boolean directApi = ((threadNum % 5) &lt; 3)
+vars.put(&apos;thread_num&apos;, String.valueOf(threadNum))
+vars.put(&apos;traffic_is_direct&apos;, String.valueOf(directApi))
+vars.put(&apos;traffic_segment&apos;, directApi ? &apos;direct_api&apos; : &apos;main_journey&apos;)
+
+// Mark final iteration so cleanup runs once at thread end
+def controller = ctx.getThreadGroup().getSamplerController()
+int loops = (controller != null &amp;&amp; controller.respondsTo(&apos;getLoops&apos;)) ? controller.getLoops() : 1
+int iteration = vars.getIteration()
+boolean isLastIteration = loops &gt; 0 ? (iteration &gt;= loops) : false
+vars.put(&apos;is_last_iteration&apos;, String.valueOf(isLastIteration))
+</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+        <DebugSampler guiclass="TestBeanGUI" testclass="DebugSampler" testname="Debug Sampler" enabled="false">
+          <boolProp name="displayJMeterProperties">false</boolProp>
+          <boolProp name="displayJMeterVariables">true</boolProp>
+          <boolProp name="displaySystemProperties">false</boolProp>
+        </DebugSampler>
+        <hashTree/>
+        <SwitchController guiclass="SwitchControllerGui" testclass="SwitchController" testname="Switch Traffic Route (boolean)" enabled="true">
+          <stringProp name="SwitchController.value">${traffic_is_direct}</stringProp>
+        </SwitchController>
+        <hashTree>
+          <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="false" enabled="true"/>
+          <hashTree>
+            <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="Once Only Controller - Create User" enabled="true"/>
+            <hashTree>
+              <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="00 Create a User" enabled="true">
+                <stringProp name="HTTPSampler.domain">${defra_stub_host}</stringProp>
+                <stringProp name="HTTPSampler.protocol">https</stringProp>
+                <stringProp name="HTTPSampler.path">/cdp-defra-id-stub/API/register</stringProp>
+                <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+                <stringProp name="HTTPSampler.method">POST</stringProp>
+                <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+                <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+                <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+                  <collectionProp name="Arguments.arguments">
+                    <elementProp name="" elementType="HTTPArgument">
+                      <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                      <stringProp name="Argument.value">{&#xd;
+  &quot;userId&quot;: &quot;${__UUID()}&quot;,&#xd;
+  &quot;email&quot;: &quot;ptest_${__time(yyyyMMddHHmmssSSS)}_${__Random(1000,9999)}@test.com&quot;,&#xd;
+  &quot;firstName&quot;: &quot;John&quot;,&#xd;
+  &quot;lastName&quot;: &quot;Doe&quot;,&#xd;
+  &quot;loa&quot;: &quot;1&quot;,&#xd;
+  &quot;aal&quot;: &quot;1&quot;,&#xd;
+  &quot;enrolmentCount&quot;: 1,&#xd;
+  &quot;enrolmentRequestCount&quot;: 1,&#xd;
+  &quot;relationships&quot;: [&#xd;
+    {&#xd;
+      &quot;organisationName&quot;: &quot;Some Org&quot;,&#xd;
+      &quot;relationshipRole&quot;: &quot;Employee&quot;,&#xd;
+      &quot;roleName&quot;: &quot;Some role&quot;,&#xd;
+      &quot;roleStatus&quot;: &quot;1&quot;&#xd;
+    }&#xd;
+  ]&#xd;
+}</stringProp>
+                      <stringProp name="Argument.metadata">=</stringProp>
+                    </elementProp>
+                  </collectionProp>
+                </elementProp>
+              </HTTPSamplerProxy>
+              <hashTree>
+                <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="00 Create User JSON Headers" enabled="true">
+                  <collectionProp name="HeaderManager.headers">
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">Content-Type</stringProp>
+                      <stringProp name="Header.value">application/json</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">Accept</stringProp>
+                      <stringProp name="Header.value">application/json</stringProp>
+                    </elementProp>
+                  </collectionProp>
+                </HeaderManager>
+                <hashTree/>
+                <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="Set defra_user from Create User request body" enabled="true">
+                  <stringProp name="scriptLanguage">groovy</stringProp>
+                  <stringProp name="parameters"></stringProp>
+                  <stringProp name="filename"></stringProp>
+                  <stringProp name="cacheKey">true</stringProp>
+                  <stringProp name="script">def samplerData = prev.getSamplerData() ?: &apos;&apos;
+def matcher = (samplerData =~ /&quot;email&quot;\s*:\s*&quot;([^&quot;]+)&quot;/)
+if (matcher.find()) {
+  vars.put(&apos;defra_user&apos;, matcher.group(1))
+}</stringProp>
+                </JSR223PostProcessor>
+                <hashTree/>
+                <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
+                  <collectionProp name="Asserion.test_strings">
+                    <stringProp name="49587">201</stringProp>
+                  </collectionProp>
+                  <stringProp name="Assertion.custom_message"></stringProp>
+                  <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+                  <boolProp name="Assertion.assume_success">false</boolProp>
+                  <intProp name="Assertion.test_type">8</intProp>
+                </ResponseAssertion>
+                <hashTree/>
+                <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract expire href" enabled="true">
+                  <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+                  <stringProp name="RegexExtractor.refname">expire_href</stringProp>
+                  <stringProp name="RegexExtractor.regex">&quot;rel&quot;:&quot;expire&quot;,&quot;href&quot;:&quot;([^&quot;]+)&quot;</stringProp>
+                  <stringProp name="RegexExtractor.template">$1$</stringProp>
+                  <stringProp name="RegexExtractor.default">NOT_FOUND</stringProp>
+                  <stringProp name="RegexExtractor.match_number">1</stringProp>
+                  <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+                  <stringProp name="Sample.scope">all</stringProp>
+                </RegexExtractor>
+                <hashTree/>
+                <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert exact status 201" enabled="true">
+                  <stringProp name="scriptLanguage">groovy</stringProp>
+                  <stringProp name="parameters"></stringProp>
+                  <stringProp name="filename"></stringProp>
+                  <stringProp name="cacheKey">true</stringProp>
+                  <stringProp name="script">def expected = &apos;201&apos;
+def actual = prev.getResponseCode() ?: &apos;&apos;
+if (actual != expected) {
+  AssertionResult.setFailure(true)
+  AssertionResult.setFailureMessage(&apos;Expected status &apos; + expected + &apos;, got: &apos; + actual)
+}
+</stringProp>
+                </JSR223Assertion>
+                <hashTree/>
+              </hashTree>
+            </hashTree>
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="01 GET /" enabled="true">
+              <stringProp name="HTTPSampler.domain">${frontend_host}</stringProp>
+              <stringProp name="HTTPSampler.protocol">https</stringProp>
+              <stringProp name="HTTPSampler.path">/</stringProp>
+              <stringProp name="HTTPSampler.method">GET</stringProp>
+              <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+              <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+              <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+                <collectionProp name="Arguments.arguments"/>
+              </elementProp>
+            </HTTPSamplerProxy>
+            <hashTree>
+              <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert exact status 200" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="parameters"></stringProp>
+                <stringProp name="filename"></stringProp>
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">def expected = &apos;200&apos;
+def actual = prev.getResponseCode() ?: &apos;&apos;
+if (actual != expected) {
+  AssertionResult.setFailure(true)
+  AssertionResult.setFailureMessage(&apos;Expected status &apos; + expected + &apos;, got: &apos; + actual)
+}
+</stringProp>
+              </JSR223Assertion>
+              <hashTree/>
+            </hashTree>
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="02 POST / (isPermit=yes)" enabled="true">
+              <stringProp name="HTTPSampler.domain">${frontend_host}</stringProp>
+              <stringProp name="HTTPSampler.protocol">https</stringProp>
+              <stringProp name="HTTPSampler.path">/</stringProp>
+              <stringProp name="HTTPSampler.method">POST</stringProp>
+              <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+              <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+              <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+                <collectionProp name="Arguments.arguments">
+                  <elementProp name="isPermit" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                    <stringProp name="Argument.name">isPermit</stringProp>
+                    <stringProp name="Argument.value">yes</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  </elementProp>
+                </collectionProp>
+              </elementProp>
+            </HTTPSamplerProxy>
+            <hashTree>
+              <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert exact status 302" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="parameters"></stringProp>
+                <stringProp name="filename"></stringProp>
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">def expected = &apos;302&apos;
+def actual = prev.getResponseCode() ?: &apos;&apos;
+if (actual != expected) {
+  AssertionResult.setFailure(true)
+  AssertionResult.setFailureMessage(&apos;Expected status &apos; + expected + &apos;, got: &apos; + actual)
+}
+</stringProp>
+              </JSR223Assertion>
+              <hashTree/>
+            </hashTree>
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="03 GET /signin-oidc" enabled="true">
+              <stringProp name="HTTPSampler.domain">${frontend_host}</stringProp>
+              <stringProp name="HTTPSampler.protocol">https</stringProp>
+              <stringProp name="HTTPSampler.path">/signin-oidc</stringProp>
+              <stringProp name="HTTPSampler.method">GET</stringProp>
+              <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+              <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+              <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+                <collectionProp name="Arguments.arguments"/>
+              </elementProp>
+            </HTTPSamplerProxy>
+            <hashTree>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="03 Extract service_id from Location" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">true</stringProp>
+                <stringProp name="RegexExtractor.refname">service_id</stringProp>
+                <stringProp name="RegexExtractor.regex">serviceId=([^&amp;\r\n]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">NOT_FOUND</stringProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+              </RegexExtractor>
+              <hashTree/>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="03 Extract response_type from Location" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">true</stringProp>
+                <stringProp name="RegexExtractor.refname">response_type</stringProp>
+                <stringProp name="RegexExtractor.regex">response_type=([^&amp;\r\n]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">code</stringProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+              </RegexExtractor>
+              <hashTree/>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="03 Extract force_reselection from Location" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">true</stringProp>
+                <stringProp name="RegexExtractor.refname">force_reselection</stringProp>
+                <stringProp name="RegexExtractor.regex">forceReselection=([^&amp;\r\n]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">true</stringProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+              </RegexExtractor>
+              <hashTree/>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="03 Extract client_id from Location" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">true</stringProp>
+                <stringProp name="RegexExtractor.refname">client_id</stringProp>
+                <stringProp name="RegexExtractor.regex">client_id=([^&amp;\r\n]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">NOT_FOUND</stringProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+              </RegexExtractor>
+              <hashTree/>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="03 Extract redirect_uri from Location" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">true</stringProp>
+                <stringProp name="RegexExtractor.refname">redirect_uri</stringProp>
+                <stringProp name="RegexExtractor.regex">redirect_uri=([^&amp;\r\n]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">https%3A%2F%2F${frontend_host}%2Fsignin-oidc</stringProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+              </RegexExtractor>
+              <hashTree/>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="03 Extract state from Location" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">true</stringProp>
+                <stringProp name="RegexExtractor.refname">state</stringProp>
+                <stringProp name="RegexExtractor.regex">state=([^&amp;\r\n]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">NOT_FOUND</stringProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+              </RegexExtractor>
+              <hashTree/>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="03 Extract scope from Location" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">true</stringProp>
+                <stringProp name="RegexExtractor.refname">scope</stringProp>
+                <stringProp name="RegexExtractor.regex">scope=([^&amp;\r\n]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">openid%20offline_access</stringProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+              </RegexExtractor>
+              <hashTree/>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="03 Extract code_challenge from Location" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">true</stringProp>
+                <stringProp name="RegexExtractor.refname">code_challenge</stringProp>
+                <stringProp name="RegexExtractor.regex">code_challenge=([^&amp;\r\n]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">NOT_FOUND</stringProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+              </RegexExtractor>
+              <hashTree/>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="03 Extract code_challenge_method from Location" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">true</stringProp>
+                <stringProp name="RegexExtractor.refname">code_challenge_method</stringProp>
+                <stringProp name="RegexExtractor.regex">code_challenge_method=([^&amp;\r\n]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">S256</stringProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+              </RegexExtractor>
+              <hashTree/>
+              <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert exact status 302" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="parameters"></stringProp>
+                <stringProp name="filename"></stringProp>
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">def expected = &apos;302&apos;
+def actual = prev.getResponseCode() ?: &apos;&apos;
+if (actual != expected) {
+  AssertionResult.setFailure(true)
+  AssertionResult.setFailureMessage(&apos;Expected status &apos; + expected + &apos;, got: &apos; + actual)
+}
+</stringProp>
+              </JSR223Assertion>
+              <hashTree/>
+            </hashTree>
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="04 GET stub authorize (no user)" enabled="true">
+              <stringProp name="HTTPSampler.domain">${defra_stub_host}</stringProp>
+              <stringProp name="HTTPSampler.protocol">https</stringProp>
+              <stringProp name="HTTPSampler.path">/cdp-defra-id-stub/authorize</stringProp>
+              <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+              <stringProp name="HTTPSampler.method">GET</stringProp>
+              <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+              <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+              <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+                <collectionProp name="Arguments.arguments">
+                  <elementProp name="serviceId" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                    <stringProp name="Argument.name">serviceId</stringProp>
+                    <stringProp name="Argument.value">${service_id}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  </elementProp>
+                  <elementProp name="response_type" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                    <stringProp name="Argument.name">response_type</stringProp>
+                    <stringProp name="Argument.value">${response_type}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  </elementProp>
+                  <elementProp name="forceReselection" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                    <stringProp name="Argument.name">forceReselection</stringProp>
+                    <stringProp name="Argument.value">${force_reselection}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  </elementProp>
+                  <elementProp name="client_id" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                    <stringProp name="Argument.name">client_id</stringProp>
+                    <stringProp name="Argument.value">${client_id}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  </elementProp>
+                  <elementProp name="redirect_uri" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                    <stringProp name="Argument.name">redirect_uri</stringProp>
+                    <stringProp name="Argument.value">${redirect_uri}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  </elementProp>
+                  <elementProp name="state" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                    <stringProp name="Argument.name">state</stringProp>
+                    <stringProp name="Argument.value">${state}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  </elementProp>
+                  <elementProp name="scope" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                    <stringProp name="Argument.name">scope</stringProp>
+                    <stringProp name="Argument.value">${scope}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  </elementProp>
+                  <elementProp name="code_challenge" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                    <stringProp name="Argument.name">code_challenge</stringProp>
+                    <stringProp name="Argument.value">${code_challenge}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  </elementProp>
+                  <elementProp name="code_challenge_method" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                    <stringProp name="Argument.name">code_challenge_method</stringProp>
+                    <stringProp name="Argument.value">${code_challenge_method}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  </elementProp>
+                </collectionProp>
+              </elementProp>
+            </HTTPSamplerProxy>
+            <hashTree>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract service_id from authorize request URL" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">URL</stringProp>
+                <stringProp name="RegexExtractor.refname">service_id</stringProp>
+                <stringProp name="RegexExtractor.regex">serviceId=([^&amp;\r\n]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">NOT_FOUND</stringProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+                <stringProp name="Sample.scope">all</stringProp>
+              </RegexExtractor>
+              <hashTree/>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract response_type from authorize request URL" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">URL</stringProp>
+                <stringProp name="RegexExtractor.refname">response_type</stringProp>
+                <stringProp name="RegexExtractor.regex">response_type=([^&amp;\r\n]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">code</stringProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+                <stringProp name="Sample.scope">all</stringProp>
+              </RegexExtractor>
+              <hashTree/>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract force_reselection from authorize request URL" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">URL</stringProp>
+                <stringProp name="RegexExtractor.refname">force_reselection</stringProp>
+                <stringProp name="RegexExtractor.regex">forceReselection=([^&amp;\r\n]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">true</stringProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+                <stringProp name="Sample.scope">all</stringProp>
+              </RegexExtractor>
+              <hashTree/>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract client_id from authorize request URL" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">URL</stringProp>
+                <stringProp name="RegexExtractor.refname">client_id</stringProp>
+                <stringProp name="RegexExtractor.regex">client_id=([^&amp;\r\n]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">NOT_FOUND</stringProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+                <stringProp name="Sample.scope">all</stringProp>
+              </RegexExtractor>
+              <hashTree/>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract redirect_uri from authorize request URL" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">URL</stringProp>
+                <stringProp name="RegexExtractor.refname">redirect_uri</stringProp>
+                <stringProp name="RegexExtractor.regex">redirect_uri=([^&amp;\r\n]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">https%3A%2F%2F${frontend_host}%2Fsignin-oidc</stringProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+                <stringProp name="Sample.scope">all</stringProp>
+              </RegexExtractor>
+              <hashTree/>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract state from authorize request URL" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">URL</stringProp>
+                <stringProp name="RegexExtractor.refname">state</stringProp>
+                <stringProp name="RegexExtractor.regex">state=([^&amp;\r\n]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">NOT_FOUND</stringProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+                <stringProp name="Sample.scope">all</stringProp>
+              </RegexExtractor>
+              <hashTree/>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract scope from authorize request URL" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">URL</stringProp>
+                <stringProp name="RegexExtractor.refname">scope</stringProp>
+                <stringProp name="RegexExtractor.regex">scope=([^&amp;\r\n]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">openid%20offline_access</stringProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+                <stringProp name="Sample.scope">all</stringProp>
+              </RegexExtractor>
+              <hashTree/>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract code_challenge from authorize request URL" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">URL</stringProp>
+                <stringProp name="RegexExtractor.refname">code_challenge</stringProp>
+                <stringProp name="RegexExtractor.regex">code_challenge=([^&amp;\r\n]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">NOT_FOUND</stringProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+                <stringProp name="Sample.scope">all</stringProp>
+              </RegexExtractor>
+              <hashTree/>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract code_challenge_method from authorize request URL" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">URL</stringProp>
+                <stringProp name="RegexExtractor.refname">code_challenge_method</stringProp>
+                <stringProp name="RegexExtractor.regex">code_challenge_method=([^&amp;\r\n]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">S256</stringProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+                <stringProp name="Sample.scope">all</stringProp>
+              </RegexExtractor>
+              <hashTree/>
+              <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert exact status 200" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="parameters"></stringProp>
+                <stringProp name="filename"></stringProp>
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">def expected = &apos;200&apos;
+def actual = prev.getResponseCode() ?: &apos;&apos;
+if (actual != expected) {
+  AssertionResult.setFailure(true)
+  AssertionResult.setFailureMessage(&apos;Expected status &apos; + expected + &apos;, got: &apos; + actual)
+}
+</stringProp>
+              </JSR223Assertion>
+              <hashTree/>
+            </hashTree>
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="05 GET stub authorize (with user)" enabled="true">
+              <stringProp name="HTTPSampler.domain">${defra_stub_host}</stringProp>
+              <stringProp name="HTTPSampler.protocol">https</stringProp>
+              <stringProp name="HTTPSampler.path">/cdp-defra-id-stub/authorize</stringProp>
+              <stringProp name="HTTPSampler.method">GET</stringProp>
+              <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+              <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+              <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+                <collectionProp name="Arguments.arguments">
+                  <elementProp name="serviceId" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                    <stringProp name="Argument.name">serviceId</stringProp>
+                    <stringProp name="Argument.value">${service_id}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  </elementProp>
+                  <elementProp name="response_type" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                    <stringProp name="Argument.name">response_type</stringProp>
+                    <stringProp name="Argument.value">${response_type}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  </elementProp>
+                  <elementProp name="forceReselection" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                    <stringProp name="Argument.name">forceReselection</stringProp>
+                    <stringProp name="Argument.value">${force_reselection}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  </elementProp>
+                  <elementProp name="client_id" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                    <stringProp name="Argument.name">client_id</stringProp>
+                    <stringProp name="Argument.value">${client_id}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  </elementProp>
+                  <elementProp name="redirect_uri" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                    <stringProp name="Argument.name">redirect_uri</stringProp>
+                    <stringProp name="Argument.value">${redirect_uri}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  </elementProp>
+                  <elementProp name="state" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                    <stringProp name="Argument.name">state</stringProp>
+                    <stringProp name="Argument.value">${state}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  </elementProp>
+                  <elementProp name="scope" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                    <stringProp name="Argument.name">scope</stringProp>
+                    <stringProp name="Argument.value">${scope}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  </elementProp>
+                  <elementProp name="code_challenge" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                    <stringProp name="Argument.name">code_challenge</stringProp>
+                    <stringProp name="Argument.value">${code_challenge}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  </elementProp>
+                  <elementProp name="code_challenge_method" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                    <stringProp name="Argument.name">code_challenge_method</stringProp>
+                    <stringProp name="Argument.value">${code_challenge_method}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  </elementProp>
+                  <elementProp name="user" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                    <stringProp name="Argument.name">user</stringProp>
+                    <stringProp name="Argument.value">${defra_user}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  </elementProp>
+                </collectionProp>
+              </elementProp>
+            </HTTPSamplerProxy>
+            <hashTree>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract auth_code from Location" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">true</stringProp>
+                <stringProp name="RegexExtractor.refname">auth_code</stringProp>
+                <stringProp name="RegexExtractor.regex">sessionId=([^&amp;\r\n]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">${session_id}</stringProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+                <stringProp name="Sample.scope">all</stringProp>
+              </RegexExtractor>
+              <hashTree/>
+              <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert exact status 302" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="parameters"></stringProp>
+                <stringProp name="filename"></stringProp>
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">def expected = &apos;302&apos;
+def actual = prev.getResponseCode() ?: &apos;&apos;
+if (actual != expected) {
+  AssertionResult.setFailure(true)
+  AssertionResult.setFailureMessage(&apos;Expected status &apos; + expected + &apos;, got: &apos; + actual)
+}
+</stringProp>
+              </JSR223Assertion>
+              <hashTree/>
+            </hashTree>
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="06 GET stub organisations" enabled="true">
+              <stringProp name="HTTPSampler.domain">${defra_stub_host}</stringProp>
+              <stringProp name="HTTPSampler.protocol">https</stringProp>
+              <stringProp name="HTTPSampler.path">/cdp-defra-id-stub/organisations</stringProp>
+              <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+              <stringProp name="HTTPSampler.method">GET</stringProp>
+              <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+              <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+              <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+                <collectionProp name="Arguments.arguments">
+                  <elementProp name="sessionId" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                    <stringProp name="Argument.name">sessionId</stringProp>
+                    <stringProp name="Argument.value">${auth_code}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  </elementProp>
+                </collectionProp>
+              </elementProp>
+            </HTTPSamplerProxy>
+            <hashTree>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract relationship_id from organisations HTML" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+                <stringProp name="RegexExtractor.refname">relationship_id</stringProp>
+                <stringProp name="RegexExtractor.regex">name=&quot;relationshipId&quot;[^&gt;]*value=&quot;([^&quot;]+)&quot;</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">NOT_FOUND</stringProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+                <stringProp name="Sample.scope">all</stringProp>
+              </RegexExtractor>
+              <hashTree/>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract organisation_id from organisations HTML" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+                <stringProp name="RegexExtractor.refname">organisation_id</stringProp>
+                <stringProp name="RegexExtractor.regex">Organisation ID:\s*([0-9a-fA-F-]{36})</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">NOT_FOUND</stringProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+                <stringProp name="Sample.scope">all</stringProp>
+              </RegexExtractor>
+              <hashTree/>
+              <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert exact status 200" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="parameters"></stringProp>
+                <stringProp name="filename"></stringProp>
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">def expected = &apos;200&apos;
+def actual = prev.getResponseCode() ?: &apos;&apos;
+if (actual != expected) {
+  AssertionResult.setFailure(true)
+  AssertionResult.setFailureMessage(&apos;Expected status &apos; + expected + &apos;, got: &apos; + actual)
+}
+</stringProp>
+              </JSR223Assertion>
+              <hashTree/>
+            </hashTree>
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="08 GET /signin-oidc with code+state" enabled="true">
+              <stringProp name="HTTPSampler.domain">${frontend_host}</stringProp>
+              <stringProp name="HTTPSampler.protocol">https</stringProp>
+              <stringProp name="HTTPSampler.path">/signin-oidc</stringProp>
+              <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+              <stringProp name="HTTPSampler.method">GET</stringProp>
+              <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+              <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+              <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+                <collectionProp name="Arguments.arguments">
+                  <elementProp name="code" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                    <stringProp name="Argument.name">code</stringProp>
+                    <stringProp name="Argument.value">${auth_code}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  </elementProp>
+                  <elementProp name="state" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                    <stringProp name="Argument.name">state</stringProp>
+                    <stringProp name="Argument.value">${state}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                    <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  </elementProp>
+                </collectionProp>
+              </elementProp>
+            </HTTPSamplerProxy>
+            <hashTree>
+              <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert exact status 200" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="parameters"></stringProp>
+                <stringProp name="filename"></stringProp>
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">def expected = &apos;200&apos;
+def actual = prev.getResponseCode() ?: &apos;&apos;
+if (actual != expected) {
+  AssertionResult.setFailure(true)
+  AssertionResult.setFailureMessage(&apos;Expected status &apos; + expected + &apos;, got: &apos; + actual)
+}
+</stringProp>
+              </JSR223Assertion>
+              <hashTree/>
+            </hashTree>
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="09 GET /account" enabled="true">
+              <stringProp name="HTTPSampler.domain">${frontend_host}</stringProp>
+              <stringProp name="HTTPSampler.protocol">https</stringProp>
+              <stringProp name="HTTPSampler.path">/account</stringProp>
+              <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+              <stringProp name="HTTPSampler.method">GET</stringProp>
+              <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+              <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+              <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+                <collectionProp name="Arguments.arguments"/>
+              </elementProp>
+            </HTTPSamplerProxy>
+            <hashTree>
+              <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert exact status 200" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="parameters"></stringProp>
+                <stringProp name="filename"></stringProp>
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">def expected = &apos;200&apos;
+def actual = prev.getResponseCode() ?: &apos;&apos;
+if (actual != expected) {
+  AssertionResult.setFailure(true)
+  AssertionResult.setFailureMessage(&apos;Expected status &apos; + expected + &apos;, got: &apos; + actual)
+}
+</stringProp>
+              </JSR223Assertion>
+              <hashTree/>
+            </hashTree>
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="10 GET /next-action" enabled="true">
+              <stringProp name="HTTPSampler.domain">${frontend_host}</stringProp>
+              <stringProp name="HTTPSampler.protocol">https</stringProp>
+              <stringProp name="HTTPSampler.path">/next-action</stringProp>
+              <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+              <stringProp name="HTTPSampler.method">GET</stringProp>
+              <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+              <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+              <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+                <collectionProp name="Arguments.arguments"/>
+              </elementProp>
+            </HTTPSamplerProxy>
+            <hashTree>
+              <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert exact status 200" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="parameters"></stringProp>
+                <stringProp name="filename"></stringProp>
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">def expected = &apos;200&apos;
+def actual = prev.getResponseCode() ?: &apos;&apos;
+if (actual != expected) {
+  AssertionResult.setFailure(true)
+  AssertionResult.setFailureMessage(&apos;Expected status &apos; + expected + &apos;, got: &apos; + actual)
+}
+</stringProp>
+              </JSR223Assertion>
+              <hashTree/>
+            </hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Set journey by thread parity (50/50)" enabled="true">
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="script">// Split users deterministically: even thread -&gt; upload, odd thread -&gt; api
+int threadNum = ctx.getThreadNum()
+int journeyIndex = (threadNum % 2 == 0) ? 1 : 0
+vars.put(&apos;journey_index&apos;, String.valueOf(journeyIndex))
+vars.put(&apos;journey&apos;, journeyIndex == 0 ? &apos;api&apos; : &apos;upload&apos;)
+</stringProp>
+              <stringProp name="scriptLanguage">groovy</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <DebugSampler guiclass="TestBeanGUI" testclass="DebugSampler" testname="DEBUG Extracted Variables After Request 03" enabled="false">
+              <boolProp name="displayJMeterProperties">false</boolProp>
+              <boolProp name="displayJMeterVariables">true</boolProp>
+              <boolProp name="displaySystemProperties">false</boolProp>
+            </DebugSampler>
+            <hashTree/>
+            <SwitchController guiclass="SwitchControllerGui" testclass="SwitchController" testname="Switch Journey Route (50/50)" enabled="true">
+              <stringProp name="SwitchController.value">${journey_index}</stringProp>
+            </SwitchController>
+            <hashTree>
+              <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="Case 0 - API Journey" enabled="true"/>
+              <hashTree>
+                <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="11 POST /next-action" enabled="true">
+                  <stringProp name="HTTPSampler.domain">${frontend_host}</stringProp>
+                  <stringProp name="HTTPSampler.protocol">https</stringProp>
+                  <stringProp name="HTTPSampler.path">/next-action</stringProp>
+                  <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+                  <stringProp name="HTTPSampler.method">POST</stringProp>
+                  <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+                  <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+                  <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+                    <collectionProp name="Arguments.arguments">
+                      <elementProp name="nextAction" elementType="HTTPArgument">
+                        <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                        <stringProp name="Argument.name">nextAction</stringProp>
+                        <stringProp name="Argument.value">connectYourSoftware</stringProp>
+                        <stringProp name="Argument.metadata">=</stringProp>
+                        <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                      </elementProp>
+                    </collectionProp>
+                  </elementProp>
+                </HTTPSamplerProxy>
+                <hashTree>
+                  <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert exact status 200" enabled="true">
+                    <stringProp name="scriptLanguage">groovy</stringProp>
+                    <stringProp name="parameters"></stringProp>
+                    <stringProp name="filename"></stringProp>
+                    <stringProp name="cacheKey">true</stringProp>
+                    <stringProp name="script">def expected = &apos;200&apos;
+def actual = prev.getResponseCode() ?: &apos;&apos;
+if (actual != expected) {
+  AssertionResult.setFailure(true)
+  AssertionResult.setFailureMessage(&apos;Expected status &apos; + expected + &apos;, got: &apos; + actual)
+}
+</stringProp>
+                  </JSR223Assertion>
+                  <hashTree/>
+                </hashTree>
+                <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="12 GET /api" enabled="true">
+                  <stringProp name="HTTPSampler.domain">${frontend_host}</stringProp>
+                  <stringProp name="HTTPSampler.protocol">https</stringProp>
+                  <stringProp name="HTTPSampler.path">/api</stringProp>
+                  <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+                  <stringProp name="HTTPSampler.method">GET</stringProp>
+                  <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+                  <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+                  <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+                    <collectionProp name="Arguments.arguments"/>
+                  </elementProp>
+                </HTTPSamplerProxy>
+                <hashTree>
+                  <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert exact status 200" enabled="true">
+                    <stringProp name="scriptLanguage">groovy</stringProp>
+                    <stringProp name="parameters"></stringProp>
+                    <stringProp name="filename"></stringProp>
+                    <stringProp name="cacheKey">true</stringProp>
+                    <stringProp name="script">def expected = &apos;200&apos;
+def actual = prev.getResponseCode() ?: &apos;&apos;
+if (actual != expected) {
+  AssertionResult.setFailure(true)
+  AssertionResult.setFailureMessage(&apos;Expected status &apos; + expected + &apos;, got: &apos; + actual)
+}
+</stringProp>
+                  </JSR223Assertion>
+                  <hashTree/>
+                </hashTree>
+              </hashTree>
+              <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="Case 1 - Upload Journey" enabled="true"/>
+              <hashTree>
+                <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="11 POST /next-action (uploadSpreadsheet)" enabled="true">
+                  <stringProp name="HTTPSampler.domain">${frontend_host}</stringProp>
+                  <stringProp name="HTTPSampler.protocol">https</stringProp>
+                  <stringProp name="HTTPSampler.path">/next-action</stringProp>
+                  <stringProp name="HTTPSampler.method">POST</stringProp>
+                  <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+                  <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+                  <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+                    <collectionProp name="Arguments.arguments">
+                      <elementProp name="nextAction" elementType="HTTPArgument">
+                        <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                        <stringProp name="Argument.name">nextAction</stringProp>
+                        <stringProp name="Argument.value">uploadSpreadsheet</stringProp>
+                        <stringProp name="Argument.metadata">=</stringProp>
+                        <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                      </elementProp>
+                    </collectionProp>
+                  </elementProp>
+                </HTTPSamplerProxy>
+                <hashTree>
+                  <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert exact status 302" enabled="true">
+                    <stringProp name="scriptLanguage">groovy</stringProp>
+                    <stringProp name="parameters"></stringProp>
+                    <stringProp name="filename"></stringProp>
+                    <stringProp name="cacheKey">true</stringProp>
+                    <stringProp name="script">def expected = &apos;302&apos;
+def actual = prev.getResponseCode() ?: &apos;&apos;
+if (actual != expected) {
+  AssertionResult.setFailure(true)
+  AssertionResult.setFailureMessage(&apos;Expected status &apos; + expected + &apos;, got: &apos; + actual)
+}
+</stringProp>
+                  </JSR223Assertion>
+                  <hashTree/>
+                </hashTree>
+                <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="12 GET begin-upload" enabled="true">
+                  <stringProp name="HTTPSampler.domain">${frontend_host}</stringProp>
+                  <stringProp name="HTTPSampler.protocol">https</stringProp>
+                  <stringProp name="HTTPSampler.path">/organisation/${organisation_id}/spreadsheet/begin-upload</stringProp>
+                  <stringProp name="HTTPSampler.method">GET</stringProp>
+                  <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+                  <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+                  <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+                    <collectionProp name="Arguments.arguments"/>
+                  </elementProp>
+                </HTTPSamplerProxy>
+                <hashTree>
+                  <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract upload_action from begin-upload form" enabled="true">
+                    <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+                    <stringProp name="RegexExtractor.refname">upload_action</stringProp>
+                    <stringProp name="RegexExtractor.regex">&lt;form[^&gt;]*action=&quot;([^&quot;]*\/upload-and-scan\/[^&quot;]+)&quot;</stringProp>
+                    <stringProp name="RegexExtractor.template">$1$</stringProp>
+                    <stringProp name="RegexExtractor.default">/upload-and-scan/NOT_FOUND</stringProp>
+                    <stringProp name="RegexExtractor.match_number">1</stringProp>
+                    <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+                    <stringProp name="Sample.scope">all</stringProp>
+                  </RegexExtractor>
+                  <hashTree/>
+                  <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert exact status 200" enabled="true">
+                    <stringProp name="scriptLanguage">groovy</stringProp>
+                    <stringProp name="parameters"></stringProp>
+                    <stringProp name="filename"></stringProp>
+                    <stringProp name="cacheKey">true</stringProp>
+                    <stringProp name="script">def expected = &apos;200&apos;
+def actual = prev.getResponseCode() ?: &apos;&apos;
+if (actual != expected) {
+  AssertionResult.setFailure(true)
+  AssertionResult.setFailureMessage(&apos;Expected status &apos; + expected + &apos;, got: &apos; + actual)
+}
+</stringProp>
+                  </JSR223Assertion>
+                  <hashTree/>
+                </hashTree>
+                <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="13 POST upload-and-scan" enabled="true">
+                  <stringProp name="HTTPSampler.domain">${frontend_host}</stringProp>
+                  <stringProp name="HTTPSampler.protocol">https</stringProp>
+                  <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+                  <stringProp name="HTTPSampler.path">${upload_action}</stringProp>
+                  <stringProp name="HTTPSampler.method">POST</stringProp>
+                  <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+                  <boolProp name="HTTPSampler.DO_MULTIPART_POST">true</boolProp>
+                  <boolProp name="HTTPSampler.BROWSER_COMPATIBLE_MULTIPART">true</boolProp>
+                  <elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs">
+                    <collectionProp name="HTTPFileArgs.files">
+                      <elementProp name="${uploadFilePath}" elementType="HTTPFileArg">
+                        <stringProp name="File.mimetype">application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</stringProp>
+                        <stringProp name="File.path">${uploadFilePath}</stringProp>
+                        <stringProp name="File.paramname">fileUpload1</stringProp>
+                      </elementProp>
+                    </collectionProp>
+                  </elementProp>
+                  <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+                  <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+                    <collectionProp name="Arguments.arguments"/>
+                  </elementProp>
+                </HTTPSamplerProxy>
+                <hashTree>
+                  <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="13 Upload HTTP Header Manager" enabled="true">
+                    <collectionProp name="HeaderManager.headers">
+                      <elementProp name="" elementType="Header">
+                        <stringProp name="Header.name">Origin</stringProp>
+                        <stringProp name="Header.value">https://${frontend_host}</stringProp>
+                      </elementProp>
+                      <elementProp name="" elementType="Header">
+                        <stringProp name="Header.name">Referer</stringProp>
+                        <stringProp name="Header.value">https://${frontend_host}/organisation/${organisation_id}/spreadsheet/begin-upload</stringProp>
+                      </elementProp>
+                    </collectionProp>
+                  </HeaderManager>
+                  <hashTree/>
+                  <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert exact status 302" enabled="true">
+                    <stringProp name="scriptLanguage">groovy</stringProp>
+                    <stringProp name="parameters"></stringProp>
+                    <stringProp name="filename"></stringProp>
+                    <stringProp name="cacheKey">true</stringProp>
+                    <stringProp name="script">def expected = &apos;302&apos;
+def actual = prev.getResponseCode() ?: &apos;&apos;
+if (actual != expected) {
+  AssertionResult.setFailure(true)
+  AssertionResult.setFailureMessage(&apos;Expected status &apos; + expected + &apos;, got: &apos; + actual)
+}
+</stringProp>
+                  </JSR223Assertion>
+                  <hashTree/>
+                </hashTree>
+                <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="14 GET file-uploaded" enabled="true">
+                  <stringProp name="HTTPSampler.domain">${frontend_host}</stringProp>
+                  <stringProp name="HTTPSampler.protocol">https</stringProp>
+                  <stringProp name="HTTPSampler.path">/organisation/${organisation_id}/spreadsheet/file-uploaded</stringProp>
+                  <stringProp name="HTTPSampler.method">GET</stringProp>
+                  <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+                  <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+                  <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+                    <collectionProp name="Arguments.arguments"/>
+                  </elementProp>
+                </HTTPSamplerProxy>
+                <hashTree>
+                  <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert exact status 200" enabled="true">
+                    <stringProp name="scriptLanguage">groovy</stringProp>
+                    <stringProp name="parameters"></stringProp>
+                    <stringProp name="filename"></stringProp>
+                    <stringProp name="cacheKey">true</stringProp>
+                    <stringProp name="script">def expected = &apos;200&apos;
+def actual = prev.getResponseCode() ?: &apos;&apos;
+if (actual != expected) {
+  AssertionResult.setFailure(true)
+  AssertionResult.setFailureMessage(&apos;Expected status &apos; + expected + &apos;, got: &apos; + actual)
+}
+</stringProp>
+                  </JSR223Assertion>
+                  <hashTree/>
+                </hashTree>
+              </hashTree>
+            </hashTree>
+          </hashTree>
+          <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="true" enabled="true"/>
+          <hashTree>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">content-type</stringProp>
+                  <stringProp name="Header.value">application/json</stringProp>
+                </elementProp>
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">x-api-key</stringProp>
+                  <stringProp name="Header.value">${__P(cdpApiKey)}</stringProp>
+                </elementProp>
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">authorization</stringProp>
+                  <stringProp name="Header.value">Basic ${__P(backendBasicAuthHeader)}</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /organisation/apiCode" enabled="true">
+              <stringProp name="HTTPSampler.domain">${backend_service_endpoint}</stringProp>
+              <stringProp name="HTTPSampler.protocol">https</stringProp>
+              <stringProp name="HTTPSampler.path">/waste-organisation-backend/organisation/${code}</stringProp>
+              <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+              <stringProp name="HTTPSampler.method">GET</stringProp>
+              <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+              <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+              <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+                <collectionProp name="Arguments.arguments"/>
+              </elementProp>
+            </HTTPSamplerProxy>
+            <hashTree>
+              <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert exact status 200" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="parameters"></stringProp>
+                <stringProp name="filename"></stringProp>
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">def expected = &apos;200&apos;
+def actual = prev.getResponseCode() ?: &apos;&apos;
+if (actual != expected) {
+  AssertionResult.setFailure(true)
+  AssertionResult.setFailureMessage(&apos;Expected status &apos; + expected + &apos;, got: &apos; + actual)
+}
+</stringProp>
+              </JSR223Assertion>
+              <hashTree/>
+            </hashTree>
+          </hashTree>
+        </hashTree>
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="Finally - Expire User (if created)" enabled="true">
+          <stringProp name="IfController.condition">${__groovy(vars.get(&apos;is_last_iteration&apos;) == &apos;true&apos; &amp;&amp; vars.get(&apos;expire_href&apos;) != null &amp;&amp; vars.get(&apos;expire_href&apos;).trim().length() &gt; 0 &amp;&amp; vars.get(&apos;expire_href&apos;) != &apos;NOT_FOUND&apos;)}</stringProp>
+          <boolProp name="IfController.useExpression">true</boolProp>
+          <boolProp name="IfController.evaluateAll">false</boolProp>
+        </IfController>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="15 cleanup - Expire User" enabled="true">
+            <stringProp name="HTTPSampler.domain">${defra_stub_host}</stringProp>
+            <stringProp name="HTTPSampler.protocol">https</stringProp>
+            <stringProp name="HTTPSampler.path">${expire_href}</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+              <collectionProp name="Arguments.arguments"/>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="00 Create User JSON Headers" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">Content-Type</stringProp>
+                  <stringProp name="Header.value">application/json</stringProp>
+                </elementProp>
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">Accept</stringProp>
+                  <stringProp name="Header.value">application/json</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="49586">200</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.custom_message"></stringProp>
+              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">8</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+            <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Assert exact status 200" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">def expected = &apos;200&apos;
+def actual = prev.getResponseCode() ?: &apos;&apos;
+if (actual != expected) {
+  AssertionResult.setFailure(true)
+  AssertionResult.setFailureMessage(&apos;Expected status &apos; + expected + &apos;, got: &apos; + actual)
+}
+</stringProp>
+            </JSR223Assertion>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Assert Response Time Threshold" enabled="true">
+          <stringProp name="DurationAssertion.duration">8000</stringProp>
+        </DurationAssertion>
+        <hashTree/>
+        <UniformRandomTimer guiclass="UniformRandomTimerGui" testclass="UniformRandomTimer" testname="Think Time" enabled="true">
+          <stringProp name="ConstantTimer.delay">15000</stringProp>
+          <stringProp name="RandomTimer.range">45000</stringProp>
+        </UniformRandomTimer>
+        <hashTree/>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
