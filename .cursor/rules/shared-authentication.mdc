@@ -71,9 +71,9 @@ local-entrypoint.sh
 
 Bulk create/update tests use a backend authentication approach with Basic auth and an API key instead of OAuth2:
 
-- **Script**: `scripts/auth/get_waste_organisation_backend_auth.groovy` populates backend credentials (e.g. `base64EncodedCredentialWasteOrganisationBackend`).
+- **Configuration source**: Backend credentials are provided via environment variables and passed as JMeter properties by `entrypoint.sh` (e.g. `serviceAuthWasteOrganisationBackend`).
 - **Headers**: Bulk JMX files add:
-  - `Authorization: Basic ${__P(base64EncodedCredentialWasteOrganisationBackend)}`
+  - `Authorization: Basic ${__P(serviceAuthWasteOrganisationBackend)}`
   - `x-api-key: ${__P(cdpApiKey)}`
   - `Accept-Encoding: identity`
   - `x-cdp-request-id: ${__UUID()}` (always sent)
@@ -88,7 +88,7 @@ Both authentication patterns are valid and coexist; use the OAuth2 shared token 
 ## When Adding New Tests
 1. Create JMX file in appropriate `scenarios/` subdirectory
 2. For public API tests, include the `get_accessToken.groovy` JSR223PreProcessor and use the shared OAuth2 token
-3. For bulk backend tests, include the `get_waste_organisation_backend_auth.groovy` JSR223PreProcessor and use Basic auth + API key headers
+3. For bulk backend tests, use Basic auth + API key headers sourced from JMeter properties passed by `entrypoint.sh`
 4. Avoid duplicating authentication logic inside individual samplers
 
 ## Troubleshooting

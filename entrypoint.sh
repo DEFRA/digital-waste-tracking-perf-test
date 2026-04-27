@@ -19,7 +19,7 @@ check_variable "$PROFILE" "PROFILE"
 check_variable "$ENVIRONMENT" "ENVIRONMENT"
 check_variable "$CI" "CI"
 check_variable "$API_CODE" "API_CODE"
-check_variable "$SERVICE_AUTH_PASSWORD_WASTE_ORGANISATION_BACKEND" "SERVICE_AUTH_PASSWORD_WASTE_ORGANISATION_BACKEND"
+check_variable "$SERVICE_AUTH_WASTE_ORGANISATION_BACKEND" "SERVICE_AUTH_WASTE_ORGANISATION_BACKEND"
 
 # Log the run_id and environment if CI is true
 if [ "$CI" = "true" ]; then
@@ -55,7 +55,7 @@ done
 # Ensure temp/ exists for bulk cumulative state (temp/bulk-upload-cumulative-state.txt); delete that file to reset the counter.
 mkdir -p "${REPO_LOCATION}/temp"
 
-# Build list of JMX files: PROFILE is one of external-api, bulk-upload, all, or a path to a .jmx under scenarios
+# Build list of JMX files: PROFILE is one of external-api, bulk-upload, e2e, all, or a path to a .jmx under scenarios
 echo "\n\nRunning profile: ${PROFILE}"
 case "$PROFILE" in
   external-api)
@@ -64,6 +64,9 @@ case "$PROFILE" in
   bulk-upload)
     jmx_files=$(find "${JM_SCENARIOS}/bulk-create-waste-movement" "${JM_SCENARIOS}/bulk-update-waste-movement" -name "*.jmx" -type f 2>/dev/null | sort || true)
     ;;
+  e2e)
+    jmx_files="${JM_SCENARIOS}/end-to-end-user-journey/successfully/perf-test.jmx"
+    ;;
   all)
     jmx_files=$(find "${JM_SCENARIOS}" -name "*.jmx" -type f 2>/dev/null | sort || true)
     ;;
@@ -71,7 +74,7 @@ case "$PROFILE" in
     if [ -f "${JM_SCENARIOS}/${PROFILE}" ]; then
       jmx_files="${JM_SCENARIOS}/${PROFILE}"
     else
-      echo "Error: PROFILE='$PROFILE' is not supported (Supported profiles: external-api, bulk-upload, all, or a path to a JMX under scenarios e.g. bulk-update-waste-movement/successfully/baseline-test.jmx)."
+      echo "Error: PROFILE='$PROFILE' is not supported (Supported profiles: external-api, bulk-upload, e2e, all, or a path to a JMX under scenarios e.g. bulk-update-waste-movement/successfully/baseline-test.jmx)."
       exit 1
     fi
     ;;
@@ -104,6 +107,7 @@ echo "Using PROFILE: $PROFILE"
 echo "Using DEBUG: ${DEBUG:-false}"
 echo "Using jmx_files: $jmx_files"
 
+
 # Run all JMX files in scenarios folder (including subdirectories)
 test_exit_code=0
 for jmx_file in $jmx_files; do
@@ -112,7 +116,11 @@ for jmx_file in $jmx_files; do
     -Jenvironment=${ENVIRONMENT} \
     -Jci=${CI} \
     -JapiCode=${API_CODE} \
-    -JserviceAuthPasswordWasteOrganisationBackend=${SERVICE_AUTH_PASSWORD_WASTE_ORGANISATION_BACKEND} \
+    -JserviceAuthWasteOrganisationBackend=${SERVICE_AUTH_WASTE_ORGANISATION_BACKEND} \
+    -JbackendServiceEndpoint=${ORG_BACKEND_SERVICE_ENDPOINT:-} \
+    -JbackendBasicAuthHeader=${SERVICE_AUTH_WASTE_MOVEMENT_EXTERNAL_API:-} \
+    -JuploadFilePath=${UPLOAD_FILE_PATH:-} \
+    -JapiCodesCsvFile=${API_CODES_CSV_FILE:-} \
     -JclientId=${COGNITO_CLIENT_ID:-} \
     -JclientSecret=${COGNITO_CLIENT_SECRET:-} \
     -JauthBaseUrl=${COGNITO_OAUTH_BASE_URL:-} \

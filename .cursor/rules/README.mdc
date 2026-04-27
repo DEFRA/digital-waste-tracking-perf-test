@@ -75,7 +75,7 @@ This directory contains comprehensive rules for LLMs working on this performance
   - Bulk: `scripts/payloads/bulk_create_waste_movement_payload.groovy`, `scripts/payloads/bulk_update_waste_movement_payload.groovy`
 - **Authentication**: 
   - Public API shared OAuth2: `scripts/get_accessToken.groovy`
-  - Bulk backend auth: `scripts/auth/get_waste_organisation_backend_auth.groovy`
+  - Bulk backend auth: Basic auth + API key via environment variables passed as JMeter properties
 - **Logging**: `scripts/logging/after-response-log-hook.groovy` (runs when response is returned, before assertions; logs 4xx/5xx when `DEBUG=true`)
 - **Public API local headers**: `scripts/headers/remove_cdp_request_id_when_not_local.groovy` (removes x-cdp-request-id when `ENVIRONMENT≠local`)
 - **Test Execution**: `./entrypoint.sh` (uses `env.sh` for configuration and `PROFILE` to select scenarios)

@@ -21,14 +21,6 @@
       <boolProp name="TestPlan.functional_mode">false</boolProp>
     </TestPlan>
     <hashTree>
-      <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Get Backend Auth">
-        <stringProp name="scriptLanguage">groovy</stringProp>
-        <stringProp name="filename">scripts/auth/get_waste_organisation_backend_auth.groovy</stringProp>
-        <stringProp name="parameters"></stringProp>
-        <stringProp name="cacheKey">false</stringProp>
-        <stringProp name="script"></stringProp>
-      </JSR223PreProcessor>
-      <hashTree/>
       <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Configure Waste Movement Backend URL">
         <stringProp name="scriptLanguage">groovy</stringProp>
         <stringProp name="filename">scripts/config/configure_waste_movement_backend_url.groovy</stringProp>
@@ -97,7 +89,7 @@
               </elementProp>
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">Basic ${__P(base64EncodedCredentialWasteOrganisationBackend)}</stringProp>
+                <stringProp name="Header.value">Basic ${__P(serviceAuthWasteOrganisationBackend)}</stringProp>
               </elementProp>
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">x-api-key</stringProp>
@@ -237,7 +229,7 @@
               </elementProp>
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">Basic ${__P(base64EncodedCredentialWasteOrganisationBackend)}</stringProp>
+                <stringProp name="Header.value">Basic ${__P(serviceAuthWasteOrganisationBackend)}</stringProp>
               </elementProp>
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">x-api-key</stringProp>
@@ -377,7 +369,7 @@
               </elementProp>
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">Basic ${__P(base64EncodedCredentialWasteOrganisationBackend)}</stringProp>
+                <stringProp name="Header.value">Basic ${__P(serviceAuthWasteOrganisationBackend)}</stringProp>
               </elementProp>
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">x-api-key</stringProp>
