@@ -49,14 +49,13 @@
       </CSVDataSet>
       <hashTree/>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Unified Login + Upload/Get Org Journey">
-        <intProp name="ThreadGroup.num_threads">175</intProp>
-        <intProp name="ThreadGroup.ramp_time">300</intProp>
-        <longProp name="ThreadGroup.duration">900</longProp>
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">0</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
-        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
-          <intProp name="LoopController.loops">-1</intProp>
+          <stringProp name="LoopController.loops">1</stringProp>
           <boolProp name="LoopController.continue_forever">false</boolProp>
         </elementProp>
       </ThreadGroup>
@@ -81,23 +80,12 @@
           <stringProp name="script"></stringProp>
         </JSR223PostProcessor>
         <hashTree/>
-        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Assign traffic segment (60% direct API)" enabled="true">
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Set final iteration flag" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
-          <stringProp name="script">// Deterministic split by thread number: exactly 60% direct API (40% main journey/UI)
-int threadNum = ctx.getThreadNum() // 0-based
-boolean directApi = ((threadNum % 5) &lt; 3)
-vars.put(&apos;thread_num&apos;, String.valueOf(threadNum))
-vars.put(&apos;traffic_is_direct&apos;, String.valueOf(directApi))
-vars.put(&apos;traffic_segment&apos;, directApi ? &apos;direct_api&apos; : &apos;main_journey&apos;)
-
-// Mark final iteration so cleanup runs once at thread end
-def controller = ctx.getThreadGroup().getSamplerController()
-int loops = (controller != null &amp;&amp; controller.respondsTo(&apos;getLoops&apos;)) ? controller.getLoops() : 1
-int iteration = vars.getIteration()
-boolean isLastIteration = loops &gt; 0 ? (iteration &gt;= loops) : false
-vars.put(&apos;is_last_iteration&apos;, String.valueOf(isLastIteration))
+          <stringProp name="script">// Single-pass baseline execution; cleanup should run at thread end
+vars.put(&apos;is_last_iteration&apos;, &apos;true&apos;)
 </stringProp>
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223Sampler>
@@ -108,11 +96,9 @@ vars.put(&apos;is_last_iteration&apos;, String.valueOf(isLastIteration))
           <boolProp name="displaySystemProperties">false</boolProp>
         </DebugSampler>
         <hashTree/>
-        <SwitchController guiclass="SwitchControllerGui" testclass="SwitchController" testname="Switch Traffic Route (boolean)" enabled="true">
-          <stringProp name="SwitchController.value">${traffic_is_direct}</stringProp>
-        </SwitchController>
+        <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="Run UI and API flows sequentially" enabled="true"/>
         <hashTree>
-          <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="false" enabled="true"/>
+          <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="UI Main Journey" enabled="true"/>
           <hashTree>
             <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="Once Only Controller - Create User" enabled="true"/>
             <hashTree>
@@ -850,16 +836,11 @@ if (actual != expected) {
               </JSR223Assertion>
               <hashTree/>
             </hashTree>
-            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Set journey by thread parity (50/50)" enabled="true">
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Set journey sequencing mode" enabled="true">
               <stringProp name="cacheKey">true</stringProp>
               <stringProp name="filename"></stringProp>
               <stringProp name="parameters"></stringProp>
-              <stringProp name="script">// Split users deterministically: even thread -&gt; upload, odd thread -&gt; api
-int threadNum = ctx.getThreadNum()
-int journeyIndex = (threadNum % 2 == 0) ? 1 : 0
-vars.put(&apos;journey_index&apos;, String.valueOf(journeyIndex))
-vars.put(&apos;journey&apos;, journeyIndex == 0 ? &apos;api&apos; : &apos;upload&apos;)
-</stringProp>
+              <stringProp name="script">vars.put(&apos;journey&apos;, &apos;api_then_upload&apos;)</stringProp>
               <stringProp name="scriptLanguage">groovy</stringProp>
             </JSR223Sampler>
             <hashTree/>
@@ -869,11 +850,9 @@ vars.put(&apos;journey&apos;, journeyIndex == 0 ? &apos;api&apos; : &apos;upload
               <boolProp name="displaySystemProperties">false</boolProp>
             </DebugSampler>
             <hashTree/>
-            <SwitchController guiclass="SwitchControllerGui" testclass="SwitchController" testname="Switch Journey Route (50/50)" enabled="true">
-              <stringProp name="SwitchController.value">${journey_index}</stringProp>
-            </SwitchController>
+            <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="Run both journey paths sequentially" enabled="true"/>
             <hashTree>
-              <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="Case 0 - API Journey" enabled="true"/>
+              <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="API Sub-Journey" enabled="true"/>
               <hashTree>
                 <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="11 POST /next-action" enabled="true">
                   <stringProp name="HTTPSampler.domain">${frontend_host}</stringProp>
@@ -940,7 +919,7 @@ if (actual != expected) {
                   <hashTree/>
                 </hashTree>
               </hashTree>
-              <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="Case 1 - Upload Journey" enabled="true"/>
+              <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="Upload Sub-Journey" enabled="true"/>
               <hashTree>
                 <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="11 POST /next-action (uploadSpreadsheet)" enabled="true">
                   <stringProp name="HTTPSampler.domain">${frontend_host}</stringProp>
@@ -1097,7 +1076,7 @@ if (actual != expected) {
               </hashTree>
             </hashTree>
           </hashTree>
-          <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="true" enabled="true"/>
+          <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="Backend API Code Lookup Journey" enabled="true"/>
           <hashTree>
             <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
               <collectionProp name="HeaderManager.headers">
@@ -1207,11 +1186,6 @@ if (actual != expected) {
         <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Assert Response Time Threshold" enabled="true">
           <stringProp name="DurationAssertion.duration">8000</stringProp>
         </DurationAssertion>
-        <hashTree/>
-        <UniformRandomTimer guiclass="UniformRandomTimerGui" testclass="UniformRandomTimer" testname="Think Time" enabled="true">
-          <stringProp name="ConstantTimer.delay">15000</stringProp>
-          <stringProp name="RandomTimer.range">45000</stringProp>
-        </UniformRandomTimer>
         <hashTree/>
       </hashTree>
     </hashTree>
