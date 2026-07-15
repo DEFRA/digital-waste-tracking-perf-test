@@ -64,6 +64,9 @@ case "$PROFILE" in
   bulk-upload)
     jmx_files=$(find "${JM_SCENARIOS}/bulk-create-waste-movement" "${JM_SCENARIOS}/bulk-update-waste-movement" -name "*.jmx" -type f 2>/dev/null | sort || true)
     ;;
+  nfr-cap-10)
+    jmx_files="${JM_SCENARIOS}/waste-movement-external-api/load-test.jmx"
+    ;;
   e2e)
     jmx_files="${JM_SCENARIOS}/end-to-end-user-journey/successfully/perf-test.jmx"
     ;;
