@@ -147,11 +147,6 @@
             <stringProp name="JSONPostProcessor.defaultValues">NOT_FOUND</stringProp>
           </JSONPostProcessor>
           <hashTree/>
-          <UniformRandomTimer guiclass="UniformRandomTimerGui" testclass="UniformRandomTimer" testname="Think Time" enabled="true">
-            <stringProp name="ConstantTimer.delay">500</stringProp>
-            <stringProp name="RandomTimer.range">1000</stringProp>
-          </UniformRandomTimer>
-          <hashTree/>
         </hashTree>
         <IfController guiclass="IfControllerPanel" testclass="IfController" testname="Update Waste Movement - 10% of Threads" enabled="true">
           <stringProp name="IfController.condition">${__groovy(ctx.getThreadNum() % 10 == 0)}</stringProp>
@@ -229,11 +224,6 @@
             <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Assert Response Time Threshold" enabled="true">
               <stringProp name="DurationAssertion.duration">3000</stringProp>
             </DurationAssertion>
-            <hashTree/>
-            <UniformRandomTimer guiclass="UniformRandomTimerGui" testclass="UniformRandomTimer" testname="Think Time">
-              <stringProp name="ConstantTimer.delay">500</stringProp>
-              <stringProp name="RandomTimer.range">1000</stringProp>
-            </UniformRandomTimer>
             <hashTree/>
           </hashTree>
         </hashTree>
