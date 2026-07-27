@@ -148,8 +148,8 @@
           </JSONPostProcessor>
           <hashTree/>
           <UniformRandomTimer guiclass="UniformRandomTimerGui" testclass="UniformRandomTimer" testname="Think Time" enabled="true">
-            <stringProp name="ConstantTimer.delay">500</stringProp>
-            <stringProp name="RandomTimer.range">1000</stringProp>
+            <stringProp name="ConstantTimer.delay">50</stringProp>
+            <stringProp name="RandomTimer.range">50</stringProp>
           </UniformRandomTimer>
           <hashTree/>
         </hashTree>
@@ -230,9 +230,9 @@
               <stringProp name="DurationAssertion.duration">3000</stringProp>
             </DurationAssertion>
             <hashTree/>
-            <UniformRandomTimer guiclass="UniformRandomTimerGui" testclass="UniformRandomTimer" testname="Think Time">
-              <stringProp name="ConstantTimer.delay">500</stringProp>
-              <stringProp name="RandomTimer.range">1000</stringProp>
+            <UniformRandomTimer guiclass="UniformRandomTimerGui" testclass="UniformRandomTimer" testname="Think Time" enabled="true">
+              <stringProp name="ConstantTimer.delay">50</stringProp>
+              <stringProp name="RandomTimer.range">50</stringProp>
             </UniformRandomTimer>
             <hashTree/>
           </hashTree>
